@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useOcrMutation } from './use-ocr-mutation'
 import { toast } from 'sonner'
+import { DEV_FRIEZE_SHUFFLED } from '@/lib/devanagari'
 
 export function OcrUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -75,11 +76,12 @@ export function OcrUpload() {
       >
         {previewUrl ? (
           <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border/60">
+            {/* Image pane */}
             <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <FileArrowUp className="h-4 w-4 text-accent" size={18} />
-                  <h3 className="text-sm font-semibold text-foreground">Source Document</h3>
+                  <h3 className="text-sm font-semibold text-foreground chalk-text">Source Document</h3>
                 </div>
                 <button
                   onClick={handleRemove}
@@ -89,7 +91,7 @@ export function OcrUpload() {
                   <X size={16} />
                 </button>
               </div>
-              <div className="relative rounded-xl overflow-hidden bg-black/5 dark:bg-black/40 border border-border/50 aspect-[4/3] flex items-center justify-center group">
+              <div className="relative rounded-xl blackboard-frame bg-black/5 dark:bg-black/40 border border-border/50 aspect-[4/3] flex items-center justify-center group">
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -104,7 +106,7 @@ export function OcrUpload() {
                 {ocrMutation.isPending && (
                   <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
                     <div className="scan-line" />
-                    <div className="flex items-center gap-2.5 text-xs font-semibold text-accent bg-background/90 px-5 py-2.5 rounded-full border border-accent/30 shadow-lg">
+                    <div className="flex items-center gap-2.5 text-xs font-semibold text-accent bg-background/90 px-5 py-2.5 rounded-lg border border-dashed border-accent/30 shadow-lg chalk-text">
                       <CircleNotch size={16} className="animate-spin" />
                       Analyzing Devanagari Script...
                     </div>
@@ -113,11 +115,12 @@ export function OcrUpload() {
               </div>
             </div>
 
+            {/* Result pane */}
             <div className="p-6 sm:p-8 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Sparkle className="h-4 w-4 text-primary" size={18} />
-                  <h3 className="text-sm font-semibold text-foreground">Extracted Result</h3>
+                  <Sparkle className="h-4 w-4 text-accent" size={18} />
+                  <h3 className="text-sm font-semibold text-foreground chalk-text">Extracted Result</h3>
                 </div>
                 <AnimatePresence>
                   {ocrMutation.data && (
@@ -144,7 +147,7 @@ export function OcrUpload() {
                   >
                     <div className="text-center space-y-3">
                       <CircleNotch size={36} className="animate-spin text-accent mx-auto" />
-                      <p className="text-sm text-muted-foreground font-medium">Processing Devanagari text...</p>
+                      <p className="text-sm text-muted-foreground font-medium chalk-text">Processing Devanagari text...</p>
                     </div>
                   </motion.div>
                 ) : ocrMutation.data ? (
@@ -164,9 +167,9 @@ export function OcrUpload() {
                         </span>
                       )}
                     </div>
-                    <div className="flex-1 rounded-xl border border-border/60 bg-muted/20 p-4 overflow-auto min-h-[160px]">
+                    <div className="flex-1 rounded-xl border border-border/60 bg-muted/20 p-4 overflow-auto min-h-[160px] ruled-lines margin-line">
                       <p
-                        className="text-base leading-relaxed whitespace-pre-wrap font-devanagari text-foreground"
+                        className="text-base leading-relaxed whitespace-pre-wrap font-devanagari text-foreground chalk-text"
                         lang="ne"
                       >
                         {ocrMutation.data.text || 'No text detected'}
@@ -186,9 +189,10 @@ export function OcrUpload() {
                     exit={{ opacity: 0 }}
                     className="flex-1 flex items-center justify-center min-h-[220px]"
                   >
-                    <p className="text-sm text-destructive font-medium text-center">
-                      {ocrMutation.error?.message || 'OCR processing failed.'}
-                    </p>
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-destructive font-medium">{ocrMutation.error?.message || 'OCR processing failed.'}</p>
+                      <button onClick={handleRemove} className="text-xs text-muted-foreground underline">Try again</button>
+                    </div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -218,17 +222,26 @@ export function OcrUpload() {
               ref={fileInputRef}
               onChange={handleFileChange}
             />
-            <div className="p-5 rounded-2xl bg-accent/10 border border-accent/20 mb-5 group-hover:scale-110 transition-transform duration-300 shadow-md">
+
+            {/* Devanagari frieze */}
+            <div className="devanagari-frieze text-xs mb-6 opacity-30">
+              {DEV_FRIEZE_SHUFFLED.map((ch, i) => (
+                <span key={i}>{ch}</span>
+              ))}
+            </div>
+
+            <div className="p-5 rounded-2xl bg-accent/10 border border-dashed border-accent/30 mb-5 group-hover:scale-110 transition-transform duration-300">
               <Upload className="h-9 w-9 text-accent" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">
+            <h3 className="text-xl font-bold text-foreground mb-2 chalk-text">
               Upload Document Image
             </h3>
             <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm leading-relaxed">
               Drag & drop image files here, or click to browse. JPG, PNG, and WebP supported.
             </p>
             <Button
-              className="bg-accent text-accent-foreground hover:opacity-90 font-semibold rounded-xl px-7 py-5 shadow-lg hover:shadow-xl transition-all"
+              variant="chalk"
+              className="font-semibold rounded-xl px-7 py-5 shadow-lg hover:shadow-xl transition-all"
             >
               Choose Image File
             </Button>
@@ -242,11 +255,13 @@ export function OcrUpload() {
           onClick={() => setIsFullPagePreview(false)}
         >
           <div className="max-w-5xl max-h-[90vh] w-full h-full relative p-6">
-            <img
-              src={previewUrl}
-              alt="Full Preview"
-              className="w-full h-full object-contain rounded-lg"
-            />
+            <div className="blackboard-frame w-full h-full rounded-lg overflow-hidden bg-black/40">
+              <img
+                src={previewUrl}
+                alt="Full Preview"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <button
               onClick={() => setIsFullPagePreview(false)}
               className="absolute top-4 right-4 bg-background text-foreground rounded-full p-2 border border-border hover:bg-secondary transition-colors"

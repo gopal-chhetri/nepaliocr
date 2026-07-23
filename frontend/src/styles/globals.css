@@ -4,52 +4,58 @@
 
 @layer base {
   :root {
-    --background: 42 20% 97%;
-    --foreground: 20 14% 4%;
-    --card: 42 20% 99%;
-    --card-foreground: 20 14% 4%;
-    --popover: 42 20% 99%;
-    --popover-foreground: 20 14% 4%;
-    --primary: 212 53% 25%;
-    --primary-foreground: 42 20% 97%;
-    --secondary: 40 16% 92%;
-    --secondary-foreground: 20 14% 4%;
-    --muted: 40 16% 92%;
-    --muted-foreground: 20 4% 45%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 20 14% 4%;
+    --background: 38 18% 92%;
+    --foreground: 30 20% 15%;
+    --card: 40 15% 96%;
+    --card-foreground: 30 20% 15%;
+    --popover: 40 15% 96%;
+    --popover-foreground: 30 20% 15%;
+    --primary: 30 50% 25%;
+    --primary-foreground: 40 15% 92%;
+    --secondary: 38 15% 86%;
+    --secondary-foreground: 30 20% 15%;
+    --muted: 38 10% 82%;
+    --muted-foreground: 30 8% 40%;
+    --accent: 45 55% 42%;
+    --accent-foreground: 30 20% 15%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 42 20% 97%;
-    --success: 160 84% 39%;
-    --success-foreground: 42 20% 97%;
-    --border: 40 12% 84%;
-    --input: 40 12% 84%;
-    --ring: 212 53% 25%;
+    --destructive-foreground: 40 15% 92%;
+    --success: 140 50% 40%;
+    --success-foreground: 40 15% 92%;
+    --border: 38 10% 76%;
+    --input: 38 10% 76%;
+    --ring: 45 55% 42%;
     --radius: 0.75rem;
+    --chalk-yellow: #C8A84C;
+    --chalk-white: #F5F0E8;
+    --blackboard: #6B4C3B;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 40 20% 95%;
-    --card: 222 47% 10%;
-    --card-foreground: 40 20% 95%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 40 20% 95%;
-    --primary: 38 92% 50%;
-    --primary-foreground: 222 47% 8%;
-    --secondary: 217 32% 15%;
-    --secondary-foreground: 40 20% 95%;
-    --muted: 217 32% 15%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 222 47% 8%;
+    --background: 30 18% 11%;
+    --foreground: 40 12% 82%;
+    --card: 30 14% 16%;
+    --card-foreground: 40 12% 82%;
+    --popover: 30 14% 16%;
+    --popover-foreground: 40 12% 82%;
+    --primary: 40 12% 82%;
+    --primary-foreground: 30 18% 11%;
+    --secondary: 30 12% 14%;
+    --secondary-foreground: 40 12% 82%;
+    --muted: 30 10% 18%;
+    --muted-foreground: 30 6% 60%;
+    --accent: 45 50% 52%;
+    --accent-foreground: 30 18% 11%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 40 20% 95%;
-    --success: 160 84% 39%;
-    --success-foreground: 40 20% 95%;
-    --border: 217 32% 18%;
-    --input: 217 32% 18%;
-    --ring: 38 92% 50%;
+    --destructive-foreground: 40 12% 92%;
+    --success: 140 50% 45%;
+    --success-foreground: 40 12% 92%;
+    --border: 30 10% 22%;
+    --input: 30 10% 22%;
+    --ring: 45 50% 52%;
+    --chalk-yellow: #F5D742;
+    --chalk-white: #D4C9B8;
+    --blackboard: #3A2A1E;
   }
 }
 
@@ -60,6 +66,38 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.025) 3px,
+        rgba(0,0,0,0.025) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.018) 3px,
+        rgba(0,0,0,0.018) 4px
+      );
+  }
+  .dark body {
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,0.018) 3px,
+        rgba(255,255,255,0.018) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,0.012) 3px,
+        rgba(255,255,255,0.012) 4px
+      );
   }
 }
 
@@ -73,43 +111,321 @@
   .font-devanagari {
     font-family: 'Noto Sans Devanagari', sans-serif;
   }
+
+  .chalk-text {
+    text-shadow:
+      0 1px 1px rgba(0,0,0,0.06),
+      0 0 2px rgba(255,255,255,0.08);
+  }
+
+  /* ── Chalk fill (grainy noise overlay for solid accent areas) ── */
+  .chalk-fill {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .chalk-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 64px 64px;
+    mix-blend-mode: soft-light;
+    opacity: 0.5;
+  }
+  .dark .chalk-fill::after {
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+  }
+
+  .chalk-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .chalk-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--chalk-yellow) 0px,
+      var(--chalk-yellow) 4px,
+      transparent 4px,
+      transparent 6px,
+      var(--chalk-yellow) 6px,
+      var(--chalk-yellow) 11px,
+      transparent 11px,
+      transparent 14px,
+      var(--chalk-yellow) 14px,
+      var(--chalk-yellow) 16px,
+      transparent 16px,
+      transparent 19px
+    );
+    border-radius: 2px;
+    opacity: 0.55;
+  }
+
+  .chalk-border {
+    border: 2px dashed hsl(var(--accent));
+    border-radius: var(--radius);
+  }
+
+  .chalk-glow {
+    box-shadow: 0 0 18px hsl(var(--accent) / 0.2);
+  }
+
+  .chalk-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.25rem;
+  }
+  .chalk-grid span {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 1.1rem;
+    text-align: center;
+    opacity: 0.3;
+    color: hsl(var(--foreground));
+    transition: opacity 0.3s;
+    user-select: none;
+  }
+  .dark .chalk-grid span {
+    color: var(--chalk-white);
+  }
 }
 
+/* ── Chalk-dust noise overlay ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+.dark body::after {
+  opacity: 0.025;
+}
+
+/* ── Blackboard frame (inset shadow for containers) ── */
+.blackboard-frame {
+  position: relative;
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--border)),
+    inset 0 0 0 4px hsl(42 12% 70% / 0.3);
+}
+.dark .blackboard-frame {
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--border)),
+    inset 0 0 0 4px hsl(30 10% 25% / 0.5);
+}
+
+/* ── Notebook-paper card (exercise copy page) ── */
+.notebook-card {
+  position: relative;
+  border: none;
+  border-radius: 0 0 4px 4px;
+  background-color: hsl(42 30% 98%);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    0 1px 2px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.dark .notebook-card {
+  background-color: hsl(40 12% 16%);
+}
+.notebook-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  width: 2px;
+  height: 100%;
+  background: hsla(0, 65%, 55%, 0.25);
+  pointer-events: none;
+}
+.notebook-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      hsla(200, 10%, 50%, 0.07) 27px,
+      hsla(200, 10%, 50%, 0.07) 28px
+    );
+}
+.notebook-card:hover {
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.1),
+    0 2px 6px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+}
+
+/* ── Ruled notebook-paper lines ── */
+.ruled-lines {
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      hsla(200, 10%, 50%, 0.07) 27px,
+      hsla(200, 10%, 50%, 0.07) 28px
+    );
+  line-height: 28px;
+}
+
+/* ── Red margin line for OCR result ── */
+.margin-line {
+  position: relative;
+}
+.margin-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  width: 2px;
+  height: 100%;
+  background: hsla(0, 65%, 55%, 0.2);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Paper texture overlay ── */
+.paper-texture {
+  position: relative;
+}
+.paper-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── Devanagari frieze (decorative border) ── */
+.devanagari-frieze {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 0.85rem;
+  color: hsl(var(--foreground));
+  opacity: 0.12;
+  user-select: none;
+  flex-wrap: wrap;
+}
+.dark .devanagari-frieze {
+  color: var(--chalk-white);
+  opacity: 0.1;
+}
+
+/* ── Chalk dust particles (for dropzone active) ── */
+@keyframes chalk-dust {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+  50% { opacity: 0.6; transform: translateY(-8px) scale(0.6); }
+}
+.chalk-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: hsl(var(--accent));
+  animation: chalk-dust 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Scan line (chalk yellow for this theme) ── */
 .scan-line {
   position: absolute;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(38, 92%, 50%), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
   animation: scan 1.5s ease-in-out infinite;
 }
 
 @keyframes scan {
-  0% {
-    top: 0;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
+  0%   { top: 0; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 hsl(38 92% 50% / 0.3);
-  }
-  50% {
-    box-shadow: 0 0 0 12px hsl(38 92% 50% / 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.3); }
+  50%      { box-shadow: 0 0 0 12px hsl(var(--accent) / 0); }
 }
 
 .dropzone-active {
   animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* ── Chalk wavy underline on section headings ── */
+.chalk-heading {
+  position: relative;
+  display: inline-block;
+}
+.chalk-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 5%;
+  width: 90%;
+  height: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--chalk-yellow) 0px,
+    var(--chalk-yellow) 4px,
+    transparent 4px,
+    transparent 7px,
+    var(--chalk-yellow) 7px,
+    var(--chalk-yellow) 13px,
+    transparent 13px,
+    transparent 16px,
+    var(--chalk-yellow) 16px,
+    var(--chalk-yellow) 18px,
+    transparent 18px,
+    transparent 22px
+  );
+  border-radius: 3px;
+  opacity: 0.4;
+}
+
+/* ── Chalk marker focus ring ── */
+.chalk-focus:focus {
+  outline: none;
+  border-bottom: 3px solid hsl(var(--accent));
+  box-shadow: 0 4px 0 -1px hsl(var(--accent));
+}
+
+/* ── Notch border for chalk-drawn look ── */
+.chalk-notch {
+  position: relative;
+}
+.chalk-notch::before {
+  content: attr(data-notch);
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 1.5rem;
+  opacity: 0.15;
+  color: hsl(var(--accent));
 }

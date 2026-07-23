@@ -39,7 +39,7 @@ export function Navbar() {
             onClick={() => scrollToSection('home')}
           >
             <Image
-              src={`assets/images/logo/logo.png`}
+              src={`assets/nepaliocr.png`}
               alt="NepaliOCR Logo"
               width={40}
               height={40}

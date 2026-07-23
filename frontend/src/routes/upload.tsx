@@ -24,9 +24,10 @@ export function UploadPage() {
           </div>
         )}
         <div className="text-center space-y-4 mb-12">
-          <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground">
+          <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
             Nepali OCR Converter
           </h2>
+          <span className="chalk-underline block mx-auto w-20 h-1 mt-2 mb-4" />
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Upload your document and extract text instantly.
           </p>

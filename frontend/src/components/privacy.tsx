@@ -1,33 +1,33 @@
 import { motion } from 'framer-motion'
-import { ShieldCheck, Lock, EyeClosed, CheckCircle } from '@phosphor-icons/react'
+import { Lock, Eye, Trash, FileLock } from '@phosphor-icons/react'
+
+const items = [
+  {
+    icon: Lock,
+    title: 'Encrypted Transmission',
+    description: 'All uploaded documents are transferred over TLS 1.3 encrypted connections.',
+  },
+  {
+    icon: Eye,
+    title: 'No Human Access',
+    description: 'Automated processing only. No human reviews or stores your document contents.',
+  },
+  {
+    icon: Trash,
+    title: 'Automatic Deletion',
+    description: 'Uploaded images and extracted text are permanently deleted within 24 hours.',
+  },
+  {
+    icon: FileLock,
+    title: 'No Training Data',
+    description: 'Your documents are never used to train or fine-tune AI models.',
+  },
+]
 
 export function Privacy() {
-  const points = [
-    {
-      icon: ShieldCheck,
-      title: 'Data Encryption',
-      description: 'TLS 1.3 encryption for data in transit with secure API endpoints.',
-    },
-    {
-      icon: Lock,
-      title: 'Protected Access',
-      description: 'Strict authentication protocols safeguarding your account and usage history.',
-    },
-    {
-      icon: EyeClosed,
-      title: 'Zero Storage Guarantee',
-      description: 'Uploaded images are processed in-memory and discarded after OCR extraction.',
-    },
-    {
-      icon: CheckCircle,
-      title: 'Privacy First',
-      description: 'Full compliance with global data privacy and user safety standards.',
-    },
-  ]
-
   return (
-    <section id="privacy" className="py-28 bg-background relative border-t border-border/40">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="privacy" className="py-28 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
           className="text-center space-y-4 mb-20"
           initial={{ opacity: 0, y: 20 }}
@@ -35,34 +35,33 @@ export function Privacy() {
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-            Security Guarantee
+          <div className="inline-flex items-center gap-2 rounded-lg border border-dashed border-accent/40 bg-accent/8 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
+            Your Privacy
           </div>
-          <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground">
-            Your Privacy, Our Priority
+          <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
+            Private by Design
           </h2>
+          <span className="chalk-underline block mx-auto w-24 h-1 mt-2" />
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            We are committed to absolute data confidentiality and secure document processing.
+            Your documents stay yours. Built-in privacy at every layer of the stack.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {points.map((point, index) => (
+        <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {items.map((item, index) => (
             <motion.div
               key={index}
-              className="group bg-card rounded-2xl p-8 border border-border/60 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all duration-300 flex items-start gap-5"
+              className="notebook-card rounded-2xl p-8 transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
               viewport={{ once: true }}
             >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0 group-hover:scale-110 transition-transform">
-                <point.icon className="h-6 w-6" />
+              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-dashed border-accent/30 flex items-center justify-center text-accent mb-6">
+                <item.icon className="h-6 w-6" />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-foreground">{point.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{point.description}</p>
-              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
             </motion.div>
           ))}
         </div>

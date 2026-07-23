@@ -1,34 +1,33 @@
 import { FileText, Cpu, Sparkle } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 
-export function Features() {
-  const features = [
-    {
-      icon: FileText,
-      step: '01',
-      title: 'Smart Upload',
-      description: 'Drag & drop image files, scans, or photos of Devanagari manuscripts.',
-      tag: 'Instant Input',
-    },
-    {
-      icon: Cpu,
-      step: '02',
-      title: 'AI Processing',
-      description: 'Gemini AI extracts Devanagari character glyphs with contextual grammar accuracy.',
-      tag: 'Neural OCR',
-    },
-    {
-      icon: Sparkle,
-      step: '03',
-      title: 'Editable Text',
-      description: 'Copy, refine, and export digital Devanagari text ready for document workflows.',
-      tag: '1-Click Export',
-    },
-  ]
+const features = [
+  {
+    icon: FileText,
+    step: '01',
+    title: 'Smart Upload',
+    description: 'Drag & drop image files, scans, or photos of Devanagari manuscripts.',
+    tag: 'Instant Input',
+  },
+  {
+    icon: Cpu,
+    step: '02',
+    title: 'AI Processing',
+    description: 'Gemini AI extracts Devanagari character glyphs with contextual grammar accuracy.',
+    tag: 'Neural OCR',
+  },
+  {
+    icon: Sparkle,
+    step: '03',
+    title: 'Editable Text',
+    description: 'Copy, refine, and export digital Devanagari text ready for document workflows.',
+    tag: '1-Click Export',
+  },
+]
 
+export function Features() {
   return (
     <section className="py-28 bg-background relative overflow-hidden" id="features">
-      {/* Subtle background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -39,12 +38,13 @@ export function Features() {
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <div className="inline-flex items-center gap-2 rounded-lg border border-dashed border-accent/40 bg-accent/8 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
             Seamless Workflow
           </div>
-          <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground">
+          <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
             Simple 3-Step Digitization
           </h2>
+          <span className="chalk-underline block mx-auto w-24 h-1 mt-2" />
           <p className="text-lg text-muted-foreground max-w-[600px] mx-auto leading-relaxed">
             Transform physical Nepali printed documents into copyable text in seconds.
           </p>
@@ -63,17 +63,17 @@ export function Features() {
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="group relative flex flex-col p-8 rounded-2xl bg-card border border-border/60 hover:border-accent/50 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden"
+              className="notebook-card flex flex-col p-8 rounded-b-2xl"
               variants={{
                 hidden: { opacity: 0, y: 24 },
                 visible: { opacity: 1, y: 0 },
               }}
             >
-              <div className="absolute top-0 right-0 p-6 text-4xl font-serif-display font-bold text-muted/30 group-hover:text-accent/20 transition-colors">
+              <div className="absolute top-3 right-5 text-3xl font-serif-display font-bold text-accent/30 select-none">
                 {feature.step}
               </div>
 
-              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-dashed border-accent/30 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform duration-300">
                 <feature.icon className="h-6 w-6" />
               </div>
 
