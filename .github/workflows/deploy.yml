@@ -1,0 +1,102 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY_OWNER: ${{ vars.REGISTRY_OWNER || 'gopal-chhetri' }}
+
+jobs:
+  ci:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Python deps
+        run: pip install -r backend/requirements.txt
+
+      - name: Check Python imports
+        run: python -c "import app; print('Backend imports OK')"
+        working-directory: backend
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Node deps
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+  cd:
+    needs: ci
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch VPS secrets from Infisical
+        uses: Infisical/secrets-action@v1.0.16
+        with:
+          method: "oidc"
+          identity-id: ${{ vars.INFISICAL_VPS_IDENTITY_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: "prod"
+          secret-path: "/"
+
+      - name: Ensure deploy directory exists
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_SSH_USER }}
+          key: ${{ env.VPS_SSH_KEY }}
+          script: |
+            APP_DIR="/opt/app/nepaliocr"
+            sudo mkdir -p "$APP_DIR/deployments/production"
+            sudo chown -R "$(whoami):$(whoami)" "$APP_DIR"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
+            fi
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          INFISICAL_PROJECT_ID: ${{ vars.INFISICAL_PROJECT_ID }}
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_SSH_USER }}
+          key: ${{ env.VPS_SSH_KEY }}
+          envs: REGISTRY_USERNAME,REGISTRY_PASSWORD,INFISICAL_CLIENT_ID,INFISICAL_CLIENT_SECRET,INFISICAL_PROJECT_ID
+          script: |
+            APP_DIR="/opt/app/nepaliocr"
+            sudo mkdir -p "$APP_DIR/deployments/production"
+            sudo chown -R "$(whoami):$(whoami)" "$APP_DIR"
+            cd "$APP_DIR"
+            export INFISICAL_TOKEN=$(infisical login \
+              --method=universal-auth \
+              --client-id="$INFISICAL_CLIENT_ID" \
+              --client-secret="$INFISICAL_CLIENT_SECRET" \
+              --silent \
+              --plain)
+            infisical run --env=prod -- ./deployments/production/deploy.sh
