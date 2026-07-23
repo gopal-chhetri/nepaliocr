@@ -1,0 +1,91 @@
+name: nepaliocr
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nepaliocr
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: deployments/production/Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgresql+asyncpg://postgres:${DB_PASS}@postgres:5432/nepaliocr
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.nepaliocr_api_http.entrypoints=http"
+      - "traefik.http.routers.nepaliocr_api_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.nepaliocr_api_https.entrypoints=https"
+      - "traefik.http.routers.nepaliocr_api_https.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.nepaliocr_api_https.tls=true"
+      - "traefik.http.routers.nepaliocr_api_https.tls.certresolver=le"
+      - "traefik.http.routers.nepaliocr_api_https.service=nepaliocr_api"
+      - "traefik.http.services.nepaliocr_api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.nepaliocr_api_http.middlewares=https-redirect"
+    networks:
+      - default
+      - traefik-network
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: deployments/production/Dockerfile.frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.nepaliocr_http.entrypoints=http"
+      - "traefik.http.routers.nepaliocr_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_https.entrypoints=https"
+      - "traefik.http.routers.nepaliocr_https.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_https.tls=true"
+      - "traefik.http.routers.nepaliocr_https.tls.certresolver=le"
+      - "traefik.http.routers.nepaliocr_https.service=nepaliocr_frontend"
+      - "traefik.http.services.nepaliocr_frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.nepaliocr_http.middlewares=https-redirect"
+    networks:
+      - default
+      - traefik-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  traefik-network:
+    external: true
