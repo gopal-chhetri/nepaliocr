@@ -19,7 +19,7 @@ cd "$COMPOSE_DIR"
 
 # ── Validate required secrets are present ──
 echo ">>> Validating environment variables..."
-if [ -z "$DB_PASS" ] || [ -z "$OPENROUTER_API_KEYS" ] || [ -z "$JWT_SECRET" ]; then
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ] || [ -z "$OPENROUTER_API_KEYS" ] || [ -z "$JWT_SECRET" ]; then
     echo "!!! ERROR: Required secrets not found in environment"
     echo "    Make sure this script is run inside: infisical run --env=prod --"
     exit 1

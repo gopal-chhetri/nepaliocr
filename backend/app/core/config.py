@@ -36,8 +36,16 @@ class Settings(BaseSettings):
 
     ENGINE_ORDER: str = Field(default="openrouter")
 
-    DATABASE_URL: str = Field(default="postgresql+asyncpg://postgres:postgres@localhost:5432/nepaliocr")
+    DB_HOST: str = Field(default="localhost")
+    DB_PORT: int = Field(default=5432)
+    DB_USER: str = Field(default="postgres")
+    DB_PASS: str = Field(default="postgres")
+    DB_NAME: str = Field(default="nepaliocr")
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
+
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     JWT_SECRET: str = Field(default="change-me-in-production")
     JWT_ALGORITHM: str = Field(default="HS256")

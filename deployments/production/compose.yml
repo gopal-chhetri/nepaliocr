@@ -34,7 +34,11 @@ services:
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       JWT_SECRET: ${JWT_SECRET}
-      DATABASE_URL: postgresql+asyncpg://postgres:${DB_PASS}@postgres:5432/nepaliocr
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASS: ${DB_PASS}
+      DB_NAME: nepaliocr
       REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
