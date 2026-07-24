@@ -28,9 +28,7 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: ../..
-      dockerfile: deployments/production/Dockerfile.backend
+    image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
@@ -60,9 +58,7 @@ services:
       - traefik-network
 
   frontend:
-    build:
-      context: ../..
-      dockerfile: deployments/production/Dockerfile.frontend
+    image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       - backend

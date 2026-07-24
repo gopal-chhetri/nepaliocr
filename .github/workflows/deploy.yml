@@ -4,15 +4,12 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-  pull_request:
-    branches: [main]
 
 env:
   REGISTRY_OWNER: ${{ vars.REGISTRY_OWNER || 'gopal-chhetri' }}
 
 jobs:
   ci:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,8 +48,45 @@ jobs:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            SHA="${GITHUB_SHA:0:7}"
+            echo "tag=main-${SHA}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deployments/production/Dockerfile.backend
+          push: true
+          tags: |
+            ghcr.io/${{ env.REGISTRY_OWNER }}/nepaliocr-backend:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ env.REGISTRY_OWNER }}/nepaliocr-backend:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deployments/production/Dockerfile.frontend
+          push: true
+          tags: |
+            ghcr.io/${{ env.REGISTRY_OWNER }}/nepaliocr-frontend:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ env.REGISTRY_OWNER }}/nepaliocr-frontend:latest
 
       - name: Fetch VPS secrets from Infisical
         uses: Infisical/secrets-action@v1.0.16
@@ -63,7 +97,7 @@ jobs:
           env-slug: "prod"
           secret-path: "/"
 
-      - name: Ensure deploy directory exists
+      - name: Ensure deploy directory permissions
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ env.VPS_HOST }}
@@ -73,9 +107,16 @@ jobs:
             APP_DIR="/opt/app/nepaliocr"
             sudo mkdir -p "$APP_DIR/deployments/production"
             sudo chown -R "$(whoami):$(whoami)" "$APP_DIR"
-            if [ ! -d "$APP_DIR/.git" ]; then
-              git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
-            fi
+
+      - name: Sync deploy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_SSH_USER }}
+          key: ${{ env.VPS_SSH_KEY }}
+          source: "deployments/production/compose.yml,deployments/production/deploy.sh"
+          target: "/opt/app/nepaliocr"
+          strip_components: 0
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
@@ -83,20 +124,23 @@ jobs:
           INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
           INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           INFISICAL_PROJECT_ID: ${{ vars.INFISICAL_PROJECT_ID }}
+          IMAGE_TAG: ${{ steps.tag.outputs.tag }}
         with:
           host: ${{ env.VPS_HOST }}
           username: ${{ env.VPS_SSH_USER }}
           key: ${{ env.VPS_SSH_KEY }}
-          envs: REGISTRY_USERNAME,REGISTRY_PASSWORD,INFISICAL_CLIENT_ID,INFISICAL_CLIENT_SECRET,INFISICAL_PROJECT_ID
+          envs: REGISTRY_USERNAME,REGISTRY_PASSWORD,INFISICAL_CLIENT_ID,INFISICAL_CLIENT_SECRET,INFISICAL_PROJECT_ID,IMAGE_TAG
           script: |
             APP_DIR="/opt/app/nepaliocr"
             sudo mkdir -p "$APP_DIR/deployments/production"
             sudo chown -R "$(whoami):$(whoami)" "$APP_DIR"
-            cd "$APP_DIR"
+            cd "$APP_DIR/deployments/production"
+            echo "$REGISTRY_PASSWORD" | docker login ghcr.io -u "$REGISTRY_USERNAME" --password-stdin
+            chmod +x deploy.sh
             export INFISICAL_TOKEN=$(infisical login \
               --method=universal-auth \
               --client-id="$INFISICAL_CLIENT_ID" \
               --client-secret="$INFISICAL_CLIENT_SECRET" \
               --silent \
               --plain)
-            infisical run --env=prod -- ./deployments/production/deploy.sh
+            infisical run --env=prod -- ./deploy.sh "${IMAGE_TAG}"
