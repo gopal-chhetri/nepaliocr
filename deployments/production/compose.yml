@@ -5,13 +5,13 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: nepaliocr
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,12 +34,12 @@ services:
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       JWT_SECRET: ${JWT_SECRET}
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_USER: postgres
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
-      DB_NAME: nepaliocr
-      REDIS_URL: redis://redis:6379/0
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}
     depends_on:
       postgres:
         condition: service_healthy

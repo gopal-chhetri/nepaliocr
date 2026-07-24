@@ -69,7 +69,7 @@ docker compose up -d --no-deps $BACKEND_SERVICE $FRONTEND_SERVICE
 echo ""
 echo ">>> Waiting for health check..."
 RETRIES=$HEALTH_RETRIES
-until [ $RETRIES -eq 0 ] || docker compose exec -T $BACKEND_SERVICE wget -qO- "$HEALTH_URL" > /dev/null 2>&1; do
+until [ $RETRIES -eq 0 ] || docker compose exec -T $BACKEND_SERVICE python -c "import urllib.request; urllib.request.urlopen('$HEALTH_URL')" > /dev/null 2>&1; do
     RETRIES=$((RETRIES - 1))
     echo "    Retries left: $RETRIES"
     sleep $HEALTH_INTERVAL
@@ -95,7 +95,7 @@ if [ $RETRIES -eq 0 ]; then
 
     # Verify rollback
     sleep 5
-    if docker compose exec -T $BACKEND_SERVICE wget -qO- "$HEALTH_URL" > /dev/null 2>&1; then
+    if docker compose exec -T $BACKEND_SERVICE python -c "import urllib.request; urllib.request.urlopen('$HEALTH_URL')" > /dev/null 2>&1; then
         echo ">>> Rollback successful. Running: ${CURRENT_TAG}"
     else
         echo "!!! Rollback also failed. Manual intervention required."
