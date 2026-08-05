@@ -17,7 +17,7 @@ const missions = [
   },
   {
     icon: Users,
-    title: 'Empower Researchers',
+    title: 'Support Researchers',
     description: 'Accelerate scholarly, legal, and academic translation and archival work.',
   },
 ]

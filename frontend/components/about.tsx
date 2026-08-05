@@ -19,9 +19,9 @@ export function About() {
     },
     {
       icon: Users,
-      title: 'Empower Community',
+      title: 'Support Community',
       description:
-        'Foster a collaborative environment for continuous improvement of Nepali language technology.',
+        'Build a collaborative environment for improving Nepali language technology.',
     },
   ]
 
@@ -42,8 +42,8 @@ export function About() {
               Our Mission
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Empowering Nepali language preservation and accessibility through
-              cutting-edge technology
+              Supporting Nepali language preservation and accessibility through
+              modern technology
             </p>
           </motion.div>
         </div>

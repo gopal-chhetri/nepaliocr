@@ -22,7 +22,7 @@ class PaddleOCRProvider(OCRProvider):
                 self._initialized = True
                 logger.info("PaddleOCR initialized with devanagari model")
             except ImportError:
-                logger.warning("PaddleOCR not installed — provider unavailable")
+                logger.warning("PaddleOCR not installed - provider unavailable")
                 self._initialized = True
                 self._model = None
 

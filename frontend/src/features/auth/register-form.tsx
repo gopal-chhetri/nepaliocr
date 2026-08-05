@@ -48,7 +48,7 @@ export function RegisterForm() {
             Create Account
           </h2>
           <p className="text-muted-foreground text-center mb-8">
-            Get 25 OCR requests per day — sign up free
+            Get 25 OCR requests per day: sign up free
           </p>
 
           {error && (

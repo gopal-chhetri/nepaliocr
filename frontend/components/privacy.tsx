@@ -49,7 +49,7 @@ export function Privacy() {
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             At NepaliOCR, we are committed to protecting your privacy and
-            ensuring the security of your data. Our robust privacy measures are
+            ensuring the security of your data. Our strong privacy measures are
             designed to give you peace of mind.
           </p>
         </motion.div>

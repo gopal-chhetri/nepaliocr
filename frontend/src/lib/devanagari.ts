@@ -1,4 +1,4 @@
-/** Fisher-Yates shuffle — returns a new array */
+/** Fisher-Yates shuffle: returns a new array */
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -20,10 +20,10 @@ export const DEV_FRIEZE_SHUFFLED = shuffle(DEV_ALPHABET)
 /** 9-char subset for the hero chalk grid */
 export const DEV_GRID = DEV_ALPHABET.slice(0, 9)
 
-/** First 8 chars — used in login frieze */
+/** First 8 chars: used in login frieze */
 export const DEV_LOGIN = DEV_ALPHABET.slice(0, 8)
 
-/** Middle 8 chars — used in register frieze */
+/** Middle 8 chars: used in register frieze */
 export const DEV_REGISTER = DEV_ALPHABET.slice(4, 12)
 
 /** Shuffled small grids */

@@ -4,11 +4,11 @@ Web app that extracts text from images of Nepali (Devanagari-script) documents u
 
 ## Features
 
-- **OCR via Gemini API** — high-accuracy text extraction using Google's Gemini 2.0 Flash
-- **Engine abstraction** — OCRRouter with config-drive engine order; currently Gemini, ready for PaddleOCR
-- **Auth tiers** — register (25 OCR requests/day) or anonymous (10 OCR requests/day per IP)
-- **Per-minute + daily rate limiting** — double layer to protect Gemini quota
-- **Clean UI** — marketing pages (hero, features, about, privacy) + dedicated OCR upload tool
+- **OCR via Gemini API**: high-accuracy text extraction using Google's Gemini 2.0 Flash
+- **Engine abstraction**: OCRRouter with config-drive engine order; currently Gemini, ready for PaddleOCR
+- **Auth tiers**: register (25 OCR requests/day) or anonymous (10 OCR requests/day per IP)
+- **Per-minute + daily rate limiting**: double layer to protect Gemini quota
+- **Clean UI**: marketing pages (hero, features, about, privacy) + dedicated OCR upload tool
 
 ## Tech Stack
 
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8000/api/v1/ocr \
 
 ## Security
 
-- All secrets loaded from environment — no hardcoded keys
+- All secrets loaded from environment: no hardcoded keys
 - CORS restricted to explicit allowlist
 - Gemini keys never exposed to the frontend
 - Passwords hashed with bcrypt
@@ -99,7 +99,7 @@ curl -X POST http://localhost:8000/api/v1/ocr \
 
 ## Roadmap
 
-- **Phase 1** (current) — Gemini OCR with auth + quota + clean UI
-- **Phase 2** — PaddleOCR baseline (internal, `?engine=paddleocr`)
-- **Phase 3** — Fine-tune PaddleOCR on Nepali synthetic + real data
-- **Phase 4** — Flip to PaddleOCR as primary engine, Gemini as fallback
+- **Phase 1** (current): Gemini OCR with auth + quota + clean UI
+- **Phase 2**: PaddleOCR baseline (internal, `?engine=paddleocr`)
+- **Phase 3**: Fine-tune PaddleOCR on Nepali synthetic + real data
+- **Phase 4**: Flip to PaddleOCR as primary engine, Gemini as fallback

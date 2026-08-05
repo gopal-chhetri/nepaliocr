@@ -39,7 +39,7 @@ export function Features() {
           viewport={{ once: true }}
         >
           <div className="inline-flex items-center gap-2 rounded-lg border border-dashed border-accent/40 bg-accent/8 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
-            Seamless Workflow
+            Simple Workflow
           </div>
           <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
             Simple 3-Step Digitization

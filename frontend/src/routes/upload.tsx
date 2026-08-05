@@ -15,7 +15,7 @@ export function UploadPage() {
         {showBanner && (
           <div className="max-w-5xl mx-auto mb-8 bg-accent/10 border border-accent/30 rounded-xl p-4 text-center">
             <p className="text-accent text-sm font-medium">
-              You're using the anonymous tier — 10 OCR requests/day.{' '}
+              You're using the anonymous tier: 10 OCR requests/day.{' '}
               <Link to="/register" className="font-semibold underline hover:opacity-80">
                 Sign up free
               </Link>{' '}
