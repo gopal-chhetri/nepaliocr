@@ -1,26 +1,13 @@
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from app.core.config import settings
-from app.models.user import User, Base
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+from app.models.user import User
 from app.services.auth.password_handler import hash_password, verify_password
 from app.services.auth.jwt_handler import create_access_token
 from fastapi import HTTPException
 import logging
 
 logger = logging.getLogger(__name__)
-
-_engine = None
-_session_local = None
-
-
-async def get_db() -> AsyncSession:
-    global _engine, _session_local
-    if _engine is None:
-        _engine = create_async_engine(settings.DATABASE_URL, echo=False)
-        _session_local = async_sessionmaker(_engine, expire_on_commit=False)
-    async with _engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    return _session_local()
 
 
 async def register_user(email: str, password: str) -> dict:

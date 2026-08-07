@@ -32,7 +32,7 @@ export function Hero() {
             {/* Chalk badge */}
             <div className="inline-flex items-center gap-2 rounded-lg border border-dashed border-accent/50 bg-accent/8 px-4 py-1.5 text-xs font-semibold text-accent shadow-sm">
               <Sparkle className="h-3.5 w-3.5" size={14} />
-              <span className="chalk-text">Next-Gen Devanagari AI Engine</span>
+              <span className="chalk-text">OCR for Nepali & Devanagari text</span>
             </div>
 
             {/* Chalk heading with wavy underline */}
@@ -44,7 +44,7 @@ export function Hero() {
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground max-w-[580px] leading-relaxed mx-auto lg:mx-0">
-              Transform scans, printed books, and Devanagari manuscripts into editable digital text instantly powered by AI.
+              Turn scans, printed books, and Devanagari manuscripts into editable digital text.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
