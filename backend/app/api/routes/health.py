@@ -8,6 +8,15 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["health"])
 
 
+@router.get("/healthz")
+async def liveness():
+    return {
+        "status": "ok",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+    }
+
+
 @router.get("/health")
 async def health_check(response: Response):
     engine_statuses = {}
