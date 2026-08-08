@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Navbar } from '@/components/navbar'
 import { OcrUpload } from '@/features/ocr/ocr-upload'
 import { useAuth } from '@/lib/auth-context'
 import { Link } from '@tanstack/react-router'
@@ -10,7 +9,6 @@ export function UploadPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="pt-24 pb-16 container mx-auto px-4 sm:px-6 lg:px-8">
         {showBanner && (
           <div className="max-w-5xl mx-auto mb-8 bg-accent/10 border border-accent/30 rounded-xl p-4 text-center">

@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-import { Navbar } from '@/components/navbar'
 import { Hero } from '@/components/hero'
 import { Features } from '@/components/features'
 import { About } from '@/components/about'
@@ -7,18 +5,8 @@ import { Privacy } from '@/components/privacy'
 import { OcrUpload } from '@/features/ocr/ocr-upload'
 
 export function HomePage() {
-  useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    if (hash) {
-      setTimeout(() => {
-        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
-    }
-  }, [])
-
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <Hero />
       <Features />
       <section id="ocr" className="py-24 bg-secondary/30 border-y border-border">

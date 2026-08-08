@@ -6,6 +6,7 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
+  createBrowserHistory,
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/query-client'
@@ -17,6 +18,10 @@ import { LoginPage } from '@/routes/login'
 import { RegisterPage } from '@/routes/register'
 import { UploadPage } from '@/routes/upload'
 import { ContributePage } from '@/routes/contribute'
+import { OcrUpload } from '@/features/ocr/ocr-upload'
+import { About } from '@/components/about'
+import { Privacy } from '@/components/privacy'
+import { SectionLayout } from '@/components/sections'
 import '@/styles/globals.css'
 
 const rootRoute = createRootRoute({
@@ -53,15 +58,54 @@ const contributeRoute = createRoute({
   component: ContributePage,
 })
 
+const ocrRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ocr',
+  component: () => (
+    <SectionLayout>
+      <div className="space-y-8">
+        <h2 className="text-3xl font-serif-display font-bold text-foreground chalk-text">Nepali OCR Converter</h2>
+        <p className="text-muted-foreground">
+          Upload your document and watch as it's transformed into digital text in seconds.
+        </p>
+        <OcrUpload />
+      </div>
+    </SectionLayout>
+  ),
+})
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: () => (
+    <SectionLayout>
+      <About />
+    </SectionLayout>
+  ),
+})
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: () => (
+    <SectionLayout>
+      <Privacy />
+    </SectionLayout>
+  ),
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
   uploadRoute,
   contributeRoute,
+  ocrRoute,
+  aboutRoute,
+  privacyRoute,
 ])
 
-const router = createRouter({ routeTree })
+const router = createRouter({ routeTree, history: createBrowserHistory() })
 
 declare module '@tanstack/react-router' {
   interface Register {

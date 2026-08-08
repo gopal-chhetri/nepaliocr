@@ -4,7 +4,6 @@ import {
   SkipForward, Images, Upload, CheckCircle, WarningCircle, Camera, ArrowClockwise
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { Navbar } from '@/components/navbar'
 import { useOcrMutation } from '@/features/ocr/use-ocr-mutation'
 import { DevanagariEditor } from '@/features/typing/devanagari-editor'
 import { randomLines } from '@/lib/generator'
@@ -23,7 +22,6 @@ export function ContributePage() {
   const [activeTab, setActiveTab] = useState<'collect' | 'annotate'>('collect')
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="pt-24 pb-16 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="text-center space-y-4 mb-10">
           <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">

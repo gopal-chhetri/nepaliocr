@@ -19,10 +19,17 @@ export function Navbar() {
     setIsScrolled(latest > 50)
   })
 
-  const goHome = (hash?: string) => {
-    navigate({ to: '/', hash })
-    setIsMenuOpen(false)
-  }
+const NAV_ITEMS = [
+  { label: 'Home', to: '/' },
+  { label: 'OCR', to: '/ocr' },
+  { label: 'About', to: '/about' },
+  { label: 'Privacy', to: '/privacy' },
+] as const
+
+const goHome = () => {
+  navigate({ to: '/' })
+  setIsMenuOpen(false)
+}
 
   return (
     <motion.header
@@ -51,15 +58,15 @@ export function Navbar() {
           </div>
 
           <nav className="hidden md:flex items-center space-x-1">
-            {[{ label: 'Home', hash: undefined }, { label: 'OCR', hash: 'ocr' }, { label: 'About', hash: 'about' }, { label: 'Privacy', hash: 'privacy' }].map(({ label, hash }) => (
-              <button
+{NAV_ITEMS.map(({ label, to }) => (
+              <Link
                 key={label}
-                onClick={() => goHome(hash)}
+                to={to}
                 className="relative px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50 group"
               >
                 {label}
                 <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-accent/60 scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full" />
-              </button>
+              </Link>
             ))}
             <Link
               to="/contribute"
@@ -138,14 +145,14 @@ export function Navbar() {
             {DEV_FRIEZE_SHUFFLED.map((ch, i) => <span key={i}>{ch}</span>)}
           </div>
           <div className="px-4 py-3 space-y-1">
-            {[{ label: 'Home', hash: undefined }, { label: 'OCR', hash: 'ocr' }, { label: 'About', hash: 'about' }, { label: 'Privacy', hash: 'privacy' }].map(({ label, hash }) => (
-              <button
+            {NAV_ITEMS.map(({ label, to }) => (
+              <Link
                 key={label}
-                onClick={() => goHome(hash)}
-                className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                to={to}
+                className="block w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
               >
                 {label}
-              </button>
+              </Link>
             ))}
             <div className="border-t border-border pt-2 mt-2">
               {isAuthenticated ? (

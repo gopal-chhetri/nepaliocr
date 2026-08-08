@@ -34,7 +34,7 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4">
+    <div className="flex justify-center px-4 pt-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
