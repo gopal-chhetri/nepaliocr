@@ -1,6 +1,6 @@
 # NepaliOCR
 
-Web app that extracts text from images of Nepali (Devanagari-script) documents using AI.
+Web app that extracts text from images of Nepali (Devanagari-script) documents using AI. Client-side navigation uses TanStack Router with **history (pushState) routing** — clean URLs like `/ocr`, `/about`, `/contribute` (no `#` hash fragments).
 
 ## Features
 
@@ -8,9 +8,11 @@ Web app that extracts text from images of Nepali (Devanagari-script) documents u
 - **Auth tiers**: register (25 OCR requests/day) or anonymous (10 OCR requests/day per IP)
 - **Per-minute + daily rate limiting**: double layer to protect engine quota
 - **Object storage**: every OCR'd image is persisted to self-hosted MinIO (bucket `nepali-ocr`, keys `ocr/<uuid>.png` / `samples/<uuid>.png`)
-- **Contribute page** (`/contribute`), two tools:
-  - **Data Collection**: generate random Nepali sentences (selectable 1–20 lines, default 1) from the poem dictionary, render + OCR-test them, then save as a server-side sample
-  - **Annotation**: server serves the next un-annotated sample image; users transcribe it with the built-in Devanagari typing editor (romanized/traditional) and submit — building ground-truth data
+- **Contribute page** (`/contribute`) with two tabs:
+  - **Data Collection**: generate random Nepali sentences (1–20 lines, default 1) from the poem dictionary, render + OCR-test them, then save as a server-side sample. Submit is pinned to the **top** of the "Image source" card — no scroll-to-submit needed.
+    - Source modes: hand-written (camera/capture upload to `uploads/`) or AI-rendered (canvas render → OCR test → `rendered/`).
+    - Extracted line images are segmented in the background by the OpenCV `arq` worker into `lines/` and feed the Annotation tab.
+  - **Annotation**: server serves the next un-annotated line image (`GET /api/v1/annotate/next` with an `exclude` set so skipped/missing images advance); transcribe with the built-in Devanagari editor and submit. The editor keyboard is a **full-width `4×1` grid** of groups (Consonants · Vowels · Vowel signs · Numbers · Extra) with `ग्`, `क्ष`, `त्र`, `ज्ञ`, `श्र`, `ऋ`, `। ॥ ॐ` keys. The keyboard groups occupy the entire content width, and a Submit button is also pinned at the **top** of the Annotation card (keyboard sits below a full-width layout). On auth pages (sign in/up) the form is moved up (`pt-12`) and the page sets `overflow-y-hidden` so no unnecessary vertical scrollbar appears.
 - **Local OCR history**: last 20 runs stored in the browser (thumbnail + text), with re-run/download/delete
 - **Result polish**: usage badge, char/word/line/byte counts, engine badge, `.txt` download
 - **Clean UI**: marketing pages (hero, features, about, privacy) + dedicated OCR converter tool
@@ -23,6 +25,7 @@ Web app that extracts text from images of Nepali (Devanagari-script) documents u
 | OCR Engine | OpenRouter (Gemini 2.0 Flash) |
 | Database | PostgreSQL 16 (async via SQLAlchemy + asyncpg) |
 | Cache | Redis 7 (rate limits, daily quota counters) |
+| Worker | `arq` (asyncio) + `opencv-python-headless`: background line segmentation → `lines/<doc>/<i>.jpg` |
 | Object Storage | MinIO (self-hosted, presigned URLs) |
 | Auth | JWT (HS256, 15min TTL) + bcrypt passwords |
 | Frontend | Vite + React 19 + TanStack Router + TanStack Query |
@@ -51,6 +54,10 @@ docker compose up -d --build
 Local MinIO overrides (in `deployments/local-dev/.env`):
 - `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` — root credentials (default `minioadmin`)
 - `MINIO_PUBLIC_ENDPOINT=localhost:9000` — browser-reachable host used for presigned URLs (the container-internal `minio:9000` is never reachable from the browser)
+
+## Routing & Layout
+
+The app shell mounts the `Navbar` once at the **root layout** (`<Navbar />` + `<Outlet />`); route pages only render their `<Outlet />` content. This means tab-to-tab navigation never unmounts/remounts the Navbar (no animation flicker / perceived reload), and the router handles transitions client-side via **pushState** — so switching between `/`, `/ocr`, `/about`, `/privacy`, `/contribute`, `/upload` never triggers a full page reload.
 
 ## API
 

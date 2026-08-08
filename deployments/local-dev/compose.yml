@@ -76,7 +76,7 @@ services:
       context: ../..
       dockerfile: deployments/local-dev/Dockerfile.backend
     restart: unless-stopped
-    command: ["arq", "app.jobs.WorkerSettings"]
+    command: ["python", "-m", "arq", "app.jobs.WorkerSettings"]
     env_file:
       - .env
     volumes:

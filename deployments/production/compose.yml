@@ -112,7 +112,7 @@ services:
   worker:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    command: ["arq", "app.jobs.WorkerSettings"]
+    command: ["python", "-m", "arq", "app.jobs.WorkerSettings"]
     environment:
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
