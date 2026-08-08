@@ -5,7 +5,7 @@ from app.core.security import get_redis
 import logging
 
 logger = logging.getLogger(__name__)
-router = APIRouter(tags=["health"])
+router = APIRouter(prefix="/api", tags=["health"])
 
 
 @router.get("/healthz")

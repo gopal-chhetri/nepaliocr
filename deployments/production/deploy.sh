@@ -11,7 +11,7 @@ IMAGE_TAG=${1:?Usage: deploy.sh <image-tag>}
 COMPOSE_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_SERVICE="backend"
 FRONTEND_SERVICE="frontend"
-HEALTH_URL="http://localhost:8000/healthz"
+HEALTH_URL="http://localhost:8000/api/healthz"
 HEALTH_RETRIES=20
 HEALTH_INTERVAL=5
 

@@ -39,7 +39,7 @@ docker compose up -d
 
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8000
-# Health check: http://localhost:8000/health
+# Health check: http://localhost:8000/api/health
 
 # 4. Or run backend only for development
 cd backend
@@ -54,7 +54,7 @@ uvicorn app.main:app --reload
 | `POST` | `/api/v1/auth/register` | Create account (email + password) | None |
 | `POST` | `/api/v1/auth/login` | Get JWT token | None |
 | `POST` | `/api/v1/ocr` | Extract text from image | Optional (higher quota if authed) |
-| `GET` | `/health` | Service health + engine status | None |
+| `GET` | `/api/health` | Service health + dependency + engine status | None |
 
 ### OCR Request
 

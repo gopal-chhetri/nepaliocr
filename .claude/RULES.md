@@ -24,7 +24,7 @@
 - Response: `{ text: str, confidence: float | null, engine: str, metadata: { filename, content_type, size, processing_time_ms, request_id } }`
 - `POST /api/v1/auth/register` — JSON body: `{ email: str, password: str }` → Response: `{ token: str, user: { id, email } }`
 - `POST /api/v1/auth/login` — JSON body: `{ email: str, password: str }` → Response: `{ token: str, user: { id, email } }`
-- `GET /health` — Response: `{ status: str, engines: { gemini: str, paddleocr: str } }`
+- `GET /api/health` — Response: `{ status: str, checks: { database: str, redis: str }, engines: { gemini: str, paddleocr: str } }`
 
 ## Rate Limiting + Daily Quota
 - **Per-minute:** `slowapi` on `POST /api/v1/ocr` — 10 requests/minute per IP, all tiers.

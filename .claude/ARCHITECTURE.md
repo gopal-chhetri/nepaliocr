@@ -94,7 +94,7 @@ nepaliocr/
 │   │   ├── api/routes/
 │   │   │   ├── ocr.py               # POST /api/v1/ocr
 │   │   │   ├── auth.py              # POST /api/v1/auth/register, /login
-│   │   │   └── health.py            # GET /health
+│   │   │   └── health.py            # GET /api/health
 │   │   ├── services/
 │   │   │   ├── ocr/
 │   │   │   │   ├── base.py          # OCRProvider ABC, OCRResult model

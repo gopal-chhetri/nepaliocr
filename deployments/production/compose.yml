@@ -39,7 +39,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
-      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,9 +49,9 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-network"
       - "traefik.http.routers.nepaliocr_api_http.entrypoints=http"
-      - "traefik.http.routers.nepaliocr_api_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && (PathPrefix(`/api`) || Path(`/health`))"
+      - "traefik.http.routers.nepaliocr_api_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.nepaliocr_api_https.entrypoints=https"
-      - "traefik.http.routers.nepaliocr_api_https.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && (PathPrefix(`/api`) || Path(`/health`))"
+      - "traefik.http.routers.nepaliocr_api_https.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.nepaliocr_api_https.tls=true"
       - "traefik.http.routers.nepaliocr_api_https.tls.certresolver=le"
       - "traefik.http.routers.nepaliocr_api_https.service=nepaliocr_api"
