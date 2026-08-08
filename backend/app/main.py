@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter
@@ -8,10 +9,17 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.api.routes import ocr, auth, health
+from app.api.routes import ocr, auth, health, usage, annotate, storage as storage_routes, contribute
+from app.services import storage as storage_service
 import time
 
 logger = setup_logging()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await storage_service.ensure_bucket()
+    yield
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -32,6 +40,7 @@ limiter = Limiter(
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -61,6 +70,10 @@ app.add_middleware(SlowAPIMiddleware)
 app.include_router(health.router)
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(ocr.router, prefix=settings.API_V1_STR)
+app.include_router(usage.router, prefix=settings.API_V1_STR)
+app.include_router(annotate.router, prefix=settings.API_V1_STR)
+app.include_router(storage_routes.router, prefix=settings.API_V1_STR)
+app.include_router(contribute.router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     import uvicorn

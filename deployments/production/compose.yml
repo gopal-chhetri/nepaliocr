@@ -27,6 +27,45 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.nepaliocr_minio_http.entrypoints=http"
+      - "traefik.http.routers.nepaliocr_minio_http.rule=Host(`minio.${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_minio_https.entrypoints=https"
+      - "traefik.http.routers.nepaliocr_minio_https.rule=Host(`minio.${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_minio_https.tls=true"
+      - "traefik.http.routers.nepaliocr_minio_https.tls.certresolver=le"
+      - "traefik.http.routers.nepaliocr_minio_https.service=nepaliocr_minio"
+      - "traefik.http.services.nepaliocr_minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.nepaliocr_minio_http.middlewares=https-redirect"
+      - "traefik.http.routers.nepaliocr_minio_console_http.entrypoints=http"
+      - "traefik.http.routers.nepaliocr_minio_console_http.rule=Host(`minio-console.${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_minio_console_http.middlewares=https-redirect"
+      - "traefik.http.routers.nepaliocr_minio_console_https.entrypoints=https"
+      - "traefik.http.routers.nepaliocr_minio_console_https.rule=Host(`minio-console.${DOMAIN:-ocr.soylab.dpdns.org}`)"
+      - "traefik.http.routers.nepaliocr_minio_console_https.tls=true"
+      - "traefik.http.routers.nepaliocr_minio_console_https.tls.certresolver=le"
+      - "traefik.http.routers.nepaliocr_minio_console_https.service=nepaliocr_minio_console"
+      - "traefik.http.services.nepaliocr_minio_console.loadbalancer.server.port=9001"
+    networks:
+      - default
+      - traefik-network
+
   backend:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -40,10 +79,19 @@ services:
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
       REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-nepali-ocr}
+      MINIO_SECURE: "false"
+      MINIO_PUBLIC_ENDPOINT: minio.${DOMAIN:-ocr.soylab.dpdns.org}
+      MINIO_PUBLIC_SECURE: "true"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
@@ -60,6 +108,37 @@ services:
     networks:
       - default
       - traefik-network
+
+  worker:
+    image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    command: ["arq", "app.jobs.WorkerSettings"]
+    environment:
+      OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      JWT_SECRET: ${JWT_SECRET}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-nepali-ocr}
+      MINIO_SECURE: "false"
+      MINIO_PUBLIC_ENDPOINT: minio.${DOMAIN:-ocr.soylab.dpdns.org}
+      MINIO_PUBLIC_SECURE: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - default
 
   frontend:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-frontend:${IMAGE_TAG:-latest}
@@ -85,6 +164,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  minio_data:
 
 networks:
   traefik-network:

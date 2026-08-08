@@ -26,11 +26,11 @@ def get_session_factory():
 
 
 async def ensure_schema() -> None:
-    from app.models.user import Base
+    from app import models  # noqa: F401  (registers all model tables)
 
     engine = get_engine()
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(models.Base.metadata.create_all)
 
 
 async def get_db() -> AsyncSession:

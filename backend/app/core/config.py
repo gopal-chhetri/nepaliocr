@@ -43,6 +43,14 @@ class Settings(BaseSettings):
     DB_NAME: str = Field(default="nepaliocr")
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
 
+    MINIO_ENDPOINT: str = Field(default="minio:9000")
+    MINIO_ACCESS_KEY: str = Field(default="minioadmin")
+    MINIO_SECRET_KEY: str = Field(default="minioadmin")
+    MINIO_BUCKET: str = Field(default="nepali-ocr")
+    MINIO_SECURE: bool = Field(default=False)
+    MINIO_PUBLIC_ENDPOINT: str | None = None
+    MINIO_PUBLIC_SECURE: bool | None = None
+
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

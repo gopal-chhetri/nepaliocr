@@ -61,6 +61,12 @@ export function Navbar() {
                 <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-accent/60 scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full" />
               </button>
             ))}
+            <Link
+              to="/contribute"
+              className="relative px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+            >
+              Contribute
+            </Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -144,12 +150,18 @@ export function Navbar() {
             <div className="border-t border-border pt-2 mt-2">
               {isAuthenticated ? (
                 <>
-                  <Link
-                    to="/upload"
-                    className="block px-3 py-2 text-sm font-medium text-accent"
-                  >
-                    OCR Tool
-                  </Link>
+<Link
+              to="/contribute"
+              className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+            >
+              Contribute
+            </Link>
+            <Link
+              to="/upload"
+              className="block px-3 py-2 text-sm font-medium text-accent"
+            >
+              OCR Tool
+            </Link>
                   <button
                     onClick={logout}
                     className="block w-full text-left px-3 py-2 text-sm font-medium text-destructive"

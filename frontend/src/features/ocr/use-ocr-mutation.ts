@@ -8,11 +8,24 @@ interface OCRResult {
   metadata?: Record<string, any>
 }
 
+export interface OcrInput {
+  file?: File
+  imageKey?: string
+  purpose?: 'ocr' | 'sample'
+}
+
 export function useOcrMutation() {
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, imageKey, purpose = 'ocr' }: OcrInput) => {
       const formData = new FormData()
-      formData.append('image', file)
+      if (file) {
+        formData.append('image', file)
+      } else if (imageKey) {
+        formData.append('image_key', imageKey)
+      } else {
+        throw new Error('No image provided')
+      }
+      formData.append('purpose', purpose)
       return apiClient<OCRResult>('/api/v1/ocr', {
         method: 'POST',
         body: formData,

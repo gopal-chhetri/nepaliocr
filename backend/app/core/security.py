@@ -58,6 +58,33 @@ async def check_daily_quota(request: Request) -> tuple[str, int]:
         return identifier, limit
 
 
+async def get_daily_usage(request: Request) -> dict:
+    user = getattr(request.state, "user", None)
+    client_ip = request.client.host if request.client else "unknown"
+
+    if user:
+        identifier = f"user:{user['id']}"
+        limit = settings.DAILY_LIMIT_AUTHENTICATED
+    else:
+        identifier = f"ip:{client_ip}"
+        limit = settings.DAILY_LIMIT_ANONYMOUS
+
+    used = 0
+    try:
+        r = await get_redis()
+        current = await r.get(f"ocr_daily:{identifier}")
+        if current is not None:
+            used = int(current)
+    except Exception as e:
+        logger.warning(f"Redis unavailable for usage check: {e}")
+
+    return {
+        "limit": limit,
+        "used": min(used, limit),
+        "remaining": max(0, limit - used),
+    }
+
+
 async def get_rate_limit_middleware():
     from slowapi import Limiter
     from slowapi.util import get_remote_address

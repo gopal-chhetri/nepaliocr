@@ -16,6 +16,7 @@ import { HomePage } from '@/routes/index'
 import { LoginPage } from '@/routes/login'
 import { RegisterPage } from '@/routes/register'
 import { UploadPage } from '@/routes/upload'
+import { ContributePage } from '@/routes/contribute'
 import '@/styles/globals.css'
 
 const rootRoute = createRootRoute({
@@ -46,11 +47,18 @@ const uploadRoute = createRoute({
   component: UploadPage,
 })
 
+const contributeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/contribute',
+  component: ContributePage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
   uploadRoute,
+  contributeRoute,
 ])
 
 const router = createRouter({ routeTree })

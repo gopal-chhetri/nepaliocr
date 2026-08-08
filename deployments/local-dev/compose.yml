@@ -31,6 +31,25 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    container_name: nepaliocr-minio
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     container_name: nepaliocr-backend
     build:
@@ -47,6 +66,27 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  worker:
+    container_name: nepaliocr-worker
+    build:
+      context: ../..
+      dockerfile: deployments/local-dev/Dockerfile.backend
+    restart: unless-stopped
+    command: ["arq", "app.jobs.WorkerSettings"]
+    env_file:
+      - .env
+    volumes:
+      - ../../backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   frontend:
@@ -67,3 +107,4 @@ services:
 
 volumes:
   postgres_data:
+  minio_data:
