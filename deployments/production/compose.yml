@@ -84,7 +84,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-nepali-ocr}
       MINIO_SECURE: "false"
-      MINIO_PUBLIC_ENDPOINT: minio.${DOMAIN:-ocr.soylab.dpdns.org}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_DOMAIN}
       MINIO_PUBLIC_SECURE: "true"
     depends_on:
       postgres:
@@ -128,7 +128,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-nepali-ocr}
       MINIO_SECURE: "false"
-      MINIO_PUBLIC_ENDPOINT: minio.${DOMAIN:-ocr.soylab.dpdns.org}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_DOMAIN}
       MINIO_PUBLIC_SECURE: "true"
     depends_on:
       postgres:

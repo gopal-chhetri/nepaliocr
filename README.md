@@ -130,9 +130,11 @@ New compose secrets (Infisical) used by `deployments/production/compose.yml`:
 - `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD`
 There is no need for bucket CORS config because uploads flow through the backend and image display uses plain `<img>` tags.
 
-Public MinIO hosts (Traefik):
-- `minio.<DOMAIN>` → S3 API (presigned URLs)
-- `minio-console.<DOMAIN>` → console UI (port 9001, sign in with `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`)
+Public MinIO hosts (Traefik `Host(...)` rules, set via env):
+- `MINIO_DOMAIN` → S3 API (presigned URLs). The backend/worker advertise this as `MINIO_PUBLIC_ENDPOINT`.
+- `MINIO_CONSOLE_DOMAIN` → console UI (port 9001, sign in with `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`)
+
+The hosts are defined by the `MINIO_DOMAIN` / `MINIO_CONSOLE_DOMAIN` environment variables (see `deployments/production/.env.example`) and must match between Traefik routing rules and `MINIO_PUBLIC_ENDPOINT`.
 
 ## Security
 
