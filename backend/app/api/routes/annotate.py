@@ -116,7 +116,7 @@ async def next_annotation(
             raise HTTPException(status_code=400, detail="Invalid segment id in exclude")
         if excluded_ids:
             stmt = stmt.where(Segment.id.notin_(excluded_ids))
-    stmt = stmt.order_by(Segment.created_at.asc(), Segment.index.asc()).limit(1)
+    stmt = stmt.order_by(sa_func.random()).limit(1)
 
     result = await db.execute(stmt)
     segment = result.scalar_one_or_none()

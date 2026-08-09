@@ -70,6 +70,8 @@ function DataCollection() {
   const [genImage, setGenImage] = useState<string | null>(null)
   const [matchScore, setMatchScore] = useState<number | null>(null)
   const [ocrText, setOcrText] = useState('')
+  const [aiRendering, setAiRendering] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
   const ocrMutation = useOcrMutation()
 
   // handwritten upload flow
@@ -87,6 +89,8 @@ function DataCollection() {
     setGenImage(null)
     setMatchScore(null)
     setOcrText('')
+    setAiRendering(false)
+    setAiError(null)
     setFileInfo(null)
     setHandwrittenKey(null)
     setContribution(null)
@@ -101,20 +105,28 @@ function DataCollection() {
 
   const renderAndOcr = async () => {
     if (!snippetLines.length) return
-    const blob = await renderDev(snippet)
-    const file = new File([blob], 'nepali-sample.png', { type: 'image/png' })
-    const result = await ocrMutation.mutateAsync({ file, purpose: 'sample' })
-    const key = result.metadata?.image_key as string | undefined
-    if (genImage) URL.revokeObjectURL(genImage)
-    if (key) {
-      setAiImageKey(key)
-      const url = URL.createObjectURL(blob)
-      setGenImage(url)
+    setAiRendering(true)
+    setAiError(null)
+    ocrMutation.reset()
+    try {
+      const blob = await renderDev(snippet)
+      const file = new File([blob], 'nepali-sample.png', { type: 'image/png' })
+      if (genImage) URL.revokeObjectURL(genImage)
+      setGenImage(URL.createObjectURL(blob))
+      setAiRendering(false)
+      const result = await ocrMutation.mutateAsync({ file, purpose: 'sample' })
+      const key = result.metadata?.image_key as string | undefined
+      if (key) setAiImageKey(key)
+      setOcrText(result.text || '')
+      setMatchScore(
+        Math.round(similarity(snippet.replace(/\s+/g, ''), (result.text || '').replace(/\s+/g, '')) * 100),
+      )
+    } catch (e: any) {
+      setAiError(e.message || 'Render & OCR test failed')
+      toast.error(e.message || 'Render & OCR test failed')
+    } finally {
+      setAiRendering(false)
     }
-    setOcrText(result.text || '')
-    setMatchScore(
-      Math.round(similarity(snippet.replace(/\s+/g, ''), (result.text || '').replace(/\s+/g, '')) * 100),
-    )
   }
 
   const handleFileChange = async (file: File | undefined) => {
@@ -296,14 +308,16 @@ function DataCollection() {
                   size="sm"
                   className="rounded-lg"
                   onClick={renderAndOcr}
-                  disabled={!snippetLines.length || ocrMutation.isPending}
+                  disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
                 >
-                  {ocrMutation.isPending ? (
+                  {aiRendering ? (
+                    <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                  ) : ocrMutation.isPending ? (
                     <CircleNotch size={14} className="mr-1.5 animate-spin" />
                   ) : (
                     <Crosshair size={14} className="mr-1.5" />
                   )}
-                  Render & OCR Test
+                  {aiRendering ? 'Rendering…' : ocrMutation.isPending ? 'Analyzing…' : 'Render & OCR Test'}
                 </Button>
                 <Button
                   variant="ghost"
@@ -314,6 +328,13 @@ function DataCollection() {
                   <ArrowClockwise size={14} className="mr-1.5" /> Reset
                 </Button>
               </div>
+
+              {aiRendering && !genImage && (
+                <div className="flex flex-col items-center justify-center py-10 gap-3">
+                  <CircleNotch size={28} className="animate-spin text-accent" />
+                  <p className="text-sm text-muted-foreground chalk-text">Rendering Nepali text to image…</p>
+                </div>
+              )}
 
               {genImage && (
                 <div className="grid md:grid-cols-2 gap-4">
@@ -327,19 +348,31 @@ function DataCollection() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">OCR result</p>
-                    <div className="rounded-xl border border-success/40 bg-success/5 p-3 min-h-[90px]">
-                      {ocrText ? (
-                        <div className="space-y-1.5">
-                          {ocrText.split('\n').map((line, i) => (
-                            <p key={i} className="text-base font-devanagari leading-relaxed text-foreground" lang="ne">
-                              {line}
-                            </p>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No text detected</p>
-                      )}
-                    </div>
+                    {ocrMutation.isPending ? (
+                      <div className="rounded-xl border border-border/60 bg-muted/20 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2">
+                        <CircleNotch size={20} className="animate-spin text-accent" />
+                        <p className="text-xs text-muted-foreground">Analyzing Devanagari text…</p>
+                      </div>
+                    ) : aiError ? (
+                      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2 text-center">
+                        <WarningCircle size={20} className="text-destructive" />
+                        <p className="text-xs text-destructive">{aiError}</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-success/40 bg-success/5 p-3 min-h-[90px]">
+                        {ocrText ? (
+                          <div className="space-y-1.5">
+                            {ocrText.split('\n').map((line, i) => (
+                              <p key={i} className="text-base font-devanagari leading-relaxed text-foreground" lang="ne">
+                                {line}
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No text detected</p>
+                        )}
+                      </div>
+                    )}
                     <div className="mt-2 flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">
                         Engine: <span className="font-semibold text-foreground">{ocrMutation.data?.engine || '-'}</span>
