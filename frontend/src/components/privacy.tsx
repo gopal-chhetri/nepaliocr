@@ -24,9 +24,9 @@ const items = [
   },
 ]
 
-export function Privacy() {
+export function Privacy({ page = false }: { page?: boolean }) {
   return (
-    <section id="privacy" className="py-28 bg-background relative overflow-hidden">
+    <section id="privacy" className={`${page ? 'py-10 sm:py-12' : 'py-28'} bg-background relative overflow-hidden`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
           className="text-center space-y-4 mb-20"

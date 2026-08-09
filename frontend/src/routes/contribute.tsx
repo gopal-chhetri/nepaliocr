@@ -113,7 +113,6 @@ function DataCollection() {
       const file = new File([blob], 'nepali-sample.png', { type: 'image/png' })
       if (genImage) URL.revokeObjectURL(genImage)
       setGenImage(URL.createObjectURL(blob))
-      setAiRendering(false)
       const result = await ocrMutation.mutateAsync({ file, purpose: 'sample' })
       const key = result.metadata?.image_key as string | undefined
       if (key) setAiImageKey(key)
@@ -266,7 +265,7 @@ function DataCollection() {
         <div className="p-5">
           {sourceMode === 'handwritten' ? (
             <div className="space-y-4">
-              <label className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center cursor-pointer hover:border-accent/50 transition-colors">
+              <label className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center cursor-pointer hover:border-accent/50 transition-colors min-h-56">
                 <Camera size={32} className="text-accent/70" />
                 <span className="text-sm text-muted-foreground">
                   {fileInfo
@@ -302,42 +301,70 @@ function DataCollection() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="chalk"
-                  size="sm"
-                  className="rounded-lg"
-                  onClick={renderAndOcr}
-                  disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
-                >
-                  {aiRendering ? (
-                    <CircleNotch size={14} className="mr-1.5 animate-spin" />
-                  ) : ocrMutation.isPending ? (
-                    <CircleNotch size={14} className="mr-1.5 animate-spin" />
-                  ) : (
-                    <Crosshair size={14} className="mr-1.5" />
-                  )}
-                  {aiRendering ? 'Rendering…' : ocrMutation.isPending ? 'Analyzing…' : 'Render & OCR Test'}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg text-muted-foreground"
-                  onClick={handleGenerate}
-                >
-                  <ArrowClockwise size={14} className="mr-1.5" /> Reset
-                </Button>
-              </div>
-
-              {aiRendering && !genImage && (
-                <div className="flex flex-col items-center justify-center py-10 gap-3">
-                  <CircleNotch size={28} className="animate-spin text-accent" />
-                  <p className="text-sm text-muted-foreground chalk-text">Rendering Nepali text to image…</p>
+              {!genImage && !aiRendering && (
+                <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center min-h-56">
+                  <Crosshair size={32} className="text-accent/70" />
+                  <span className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                    Render the generated Nepali lines above as an image and run an OCR sanity check before saving.
+                  </span>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <Button
+                      variant="chalk"
+                      size="sm"
+                      className="rounded-lg"
+                      onClick={renderAndOcr}
+                      disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
+                    >
+                      <Crosshair size={14} className="mr-1.5" /> Render & OCR Test
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-lg text-muted-foreground"
+                      onClick={handleGenerate}
+                    >
+                      <ArrowClockwise size={14} className="mr-1.5" /> Reset
+                    </Button>
+                  </div>
                 </div>
               )}
 
-              {genImage && (
-                <div className="grid md:grid-cols-2 gap-4">
+              {aiRendering && (
+                <div className="flex flex-col items-center justify-center py-10 gap-3">
+                  <CircleNotch size={28} className="animate-spin text-accent" />
+                  <p className="text-sm text-muted-foreground chalk-text">Processing Nepali text to image…</p>
+                </div>
+              )}
+
+              {genImage && !aiRendering && (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="chalk"
+                      size="sm"
+                      className="rounded-lg"
+                      onClick={renderAndOcr}
+                      disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
+                    >
+                      {aiRendering ? (
+                        <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                      ) : ocrMutation.isPending ? (
+                        <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                      ) : (
+                        <Crosshair size={14} className="mr-1.5" />
+                      )}
+                      {aiRendering ? 'Rendering…' : ocrMutation.isPending ? 'Analyzing…' : 'Render & OCR Test'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-lg text-muted-foreground"
+                      onClick={handleGenerate}
+                    >
+                      <ArrowClockwise size={14} className="mr-1.5" /> Reset
+                    </Button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Rendered image</p>
                     <img
@@ -381,6 +408,7 @@ function DataCollection() {
                     </div>
                   </div>
                 </div>
+                </>
               )}
             </div>
           )}

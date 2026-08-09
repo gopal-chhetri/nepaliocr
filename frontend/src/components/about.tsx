@@ -22,9 +22,9 @@ const missions = [
   },
 ]
 
-export function About() {
+export function About({ page = false }: { page?: boolean }) {
   return (
-    <section id="about" className="py-28 bg-secondary/20 relative overflow-hidden">
+    <section id="about" className={`${page ? 'py-10 sm:py-12' : 'py-28'} bg-secondary/20 relative overflow-hidden`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
           className="text-center space-y-4 mb-20"

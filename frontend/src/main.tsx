@@ -78,8 +78,8 @@ const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/about',
   component: () => (
-    <SectionLayout>
-      <About />
+    <SectionLayout compact>
+      <About page />
     </SectionLayout>
   ),
 })
@@ -88,8 +88,8 @@ const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
   component: () => (
-    <SectionLayout>
-      <Privacy />
+    <SectionLayout compact>
+      <Privacy page />
     </SectionLayout>
   ),
 })
