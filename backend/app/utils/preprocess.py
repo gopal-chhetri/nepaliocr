@@ -1,6 +1,6 @@
 import io
 import logging
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
 

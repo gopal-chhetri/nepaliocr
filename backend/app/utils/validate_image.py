@@ -1,3 +1,6 @@
+import io
+
+from PIL import Image
 from fastapi import UploadFile, HTTPException
 from app.core.config import settings
 
@@ -17,3 +20,14 @@ async def validate_image(image: UploadFile) -> bytes:
         )
 
     return image_bytes
+
+def ensure_decodable_image(image_bytes: bytes) -> None:
+    """Reject bytes that aren't a real JPEG/PNG, whatever the declared type."""
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as img:
+            fmt = img.format
+            img.verify()
+    except Exception:
+        raise HTTPException(status_code=400, detail="File is not a valid image") from None
+    if fmt not in ("JPEG", "PNG"):
+        raise HTTPException(status_code=400, detail="Only JPEG and PNG images are supported")

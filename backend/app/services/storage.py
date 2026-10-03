@@ -1,10 +1,13 @@
 import asyncio
 import io
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
 from minio import Minio
+from minio.commonconfig import ENABLED, Filter
+from minio.datatypes import PostPolicy
+from minio.lifecycleconfig import Expiration, LifecycleConfig, Rule
 
 from app.core.config import settings
 
@@ -21,6 +24,12 @@ _public_client: Minio | None = None
 # words/     -> (reserved) OpenCV word crops
 # samples/   -> legacy AI-rendered sample images (kept for existing dev data)
 ALLOWED_KEY_PREFIXES = ("uploads/", "rendered/", "ocr/", "samples/", "lines/", "words/")
+
+# Images submitted to the public OCR tool. The privacy page promises they are
+# deleted within 24 hours and never reviewed by people, so they expire via a
+# bucket lifecycle rule and are never handed out as presigned GET URLs.
+OCR_PREFIX = "ocr/"
+OCR_RETENTION_DAYS = 1
 
 
 def get_client() -> Minio:
@@ -49,12 +58,29 @@ def get_public_client() -> Minio:
     return _public_client
 
 
+def _ocr_expiry_lifecycle() -> LifecycleConfig:
+    return LifecycleConfig(
+        [
+            Rule(
+                ENABLED,
+                rule_filter=Filter(prefix=OCR_PREFIX),
+                rule_id="expire-ocr-uploads",
+                expiration=Expiration(days=OCR_RETENTION_DAYS),
+            )
+        ]
+    )
+
+
 async def ensure_bucket() -> None:
     try:
         client = get_client()
         if not await asyncio.to_thread(client.bucket_exists, settings.MINIO_BUCKET):
             await asyncio.to_thread(client.make_bucket, settings.MINIO_BUCKET)
             logger.info(f"Created bucket '{settings.MINIO_BUCKET}'")
+        # Idempotent: re-applying the same lifecycle config is a no-op.
+        await asyncio.to_thread(
+            client.set_bucket_lifecycle, settings.MINIO_BUCKET, _ocr_expiry_lifecycle()
+        )
     except Exception as e:
         logger.warning(f"MinIO bucket setup failed: {e}")
 
@@ -103,21 +129,34 @@ async def get_object(key: str) -> bytes:
         raise
     except Exception as e:
         logger.warning(f"MinIO get_object failed for '{key}': {e}")
-        raise HTTPException(status_code=404, detail="Object not found")
+        raise HTTPException(status_code=404, detail="Object not found") from None
 
 
-async def presign_put(key: str, expires: int = 300) -> str:
-    client = get_public_client()
-    return await asyncio.to_thread(
-        client.presigned_put_object,
-        settings.MINIO_BUCKET,
-        key,
-        expires=timedelta(seconds=expires),
-    )
+def public_bucket_url() -> str:
+    """Browser-reachable URL of the bucket, the target of presigned POSTs."""
+    secure = settings.MINIO_PUBLIC_SECURE if settings.MINIO_PUBLIC_SECURE is not None else settings.MINIO_SECURE
+    endpoint = settings.MINIO_PUBLIC_ENDPOINT or settings.MINIO_ENDPOINT
+    return f"{'https' if secure else 'http'}://{endpoint}/{settings.MINIO_BUCKET}"
+
+
+async def presign_post(key: str, content_type: str, max_bytes: int, expires: int = 300) -> dict[str, str]:
+    """Form fields for a browser POST upload of exactly this key.
+
+    Unlike a presigned PUT, a POST policy is enforced by MinIO itself: the
+    upload is rejected unless it matches the key, content type and size range.
+    """
+    policy = PostPolicy(settings.MINIO_BUCKET, datetime.now(timezone.utc) + timedelta(seconds=expires))
+    policy.add_equals_condition("key", key)
+    policy.add_equals_condition("Content-Type", content_type)
+    policy.add_content_length_range_condition(1, max_bytes)
+    fields = await asyncio.to_thread(get_public_client().presigned_post_policy, policy)
+    return {**fields, "key": key, "Content-Type": content_type}
 
 
 async def presign_get(key: str) -> str:
     await validate_key(key)
+    if key.startswith(OCR_PREFIX):
+        raise HTTPException(status_code=400, detail="Invalid object key")
     client = get_public_client()
     return await asyncio.to_thread(
         client.presigned_get_object, settings.MINIO_BUCKET, key

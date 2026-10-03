@@ -1,14 +1,14 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.core.rate_limit import limiter
+from app.core.database import get_engine
 from app.api.routes import ocr, auth, health, usage, annotate, storage as storage_routes, contribute
 from app.services import storage as storage_service
 import time
@@ -20,6 +20,7 @@ logger = setup_logging()
 async def lifespan(app: FastAPI):
     await storage_service.ensure_bucket()
     yield
+    await get_engine().dispose()
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -30,12 +31,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         logger.info(f"Path: {request.url.path} - Method: {request.method} - Time: {process_time:.2f}s")
         return response
 
-
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=[],
-    storage_uri=settings.REDIS_URL,
-)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

@@ -24,8 +24,12 @@ jobs:
       - name: Install Python deps
         run: pip install -r backend/requirements.txt
 
-      - name: Check Python imports
-        run: python -c "import app; print('Backend imports OK')"
+      - name: Lint backend
+        run: pip install ruff && ruff check .
+        working-directory: backend
+
+      - name: Test backend
+        run: python -m pytest -q
         working-directory: backend
 
       - name: Setup Node

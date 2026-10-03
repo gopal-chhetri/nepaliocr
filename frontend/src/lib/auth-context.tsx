@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
-import { apiClient, setAuthToken, clearAuthToken } from './api-client'
+import { apiClient, setAuthToken, clearAuthToken, AUTH_EXPIRED_EVENT } from './api-client'
 
 interface User {
   id: string
@@ -59,6 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAuthToken()
     setToken(null)
     setUser(null)
+  }, [])
+
+  // The API client signals when the server rejected our token.
+  useEffect(() => {
+    const onExpired = () => {
+      setToken(null)
+      setUser(null)
+    }
+    window.addEventListener(AUTH_EXPIRED_EVENT, onExpired)
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired)
   }, [])
 
   return (

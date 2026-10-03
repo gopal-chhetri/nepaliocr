@@ -1,9 +1,14 @@
 from typing import List, Union
 from pydantic_settings import BaseSettings
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
+
+
+_DEFAULT_JWT_SECRET = "change-me-in-production"
 
 
 class Settings(BaseSettings):
+    # "production" turns default secrets into a startup error.
+    ENVIRONMENT: str = Field(default="development")
     PROJECT_NAME: str = Field(default="Nepali OCR API")
     VERSION: str = Field(default="1.0.0")
     API_V1_STR: str = Field(default="/api/v1")
@@ -55,13 +60,26 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    JWT_SECRET: str = Field(default="change-me-in-production")
+    JWT_SECRET: str = Field(default=_DEFAULT_JWT_SECRET)
     JWT_ALGORITHM: str = Field(default="HS256")
     JWT_EXPIRY_MINUTES: int = Field(default=15)
 
     RATE_LIMIT_PER_MINUTE: int = Field(default=10)
     DAILY_LIMIT_AUTHENTICATED: int = Field(default=25)
     DAILY_LIMIT_ANONYMOUS: int = Field(default=10)
+
+    @model_validator(mode="after")
+    def _reject_default_secrets_in_production(self) -> "Settings":
+        if self.ENVIRONMENT.lower() != "production":
+            return self
+        problems = []
+        if self.JWT_SECRET == _DEFAULT_JWT_SECRET or len(self.JWT_SECRET) < 32:
+            problems.append("JWT_SECRET must be set to a random value of at least 32 characters")
+        if "minioadmin" in (self.MINIO_ACCESS_KEY, self.MINIO_SECRET_KEY):
+            problems.append("MINIO_ACCESS_KEY/MINIO_SECRET_KEY must not be the minioadmin default")
+        if problems:
+            raise ValueError("; ".join(problems))
+        return self
 
     def get_cors_origins(self) -> List[str]:
         origins = list(self.BACKEND_CORS_ORIGINS)

@@ -2,13 +2,15 @@ import { apiClient } from '@/lib/api-client'
 
 export interface PresignResult {
   key: string
+  /** POST target; send every entry of `fields`, then the file as `file`. */
   url: string
+  fields: Record<string, string>
   expires_in: number
 }
 
-export type PresignSection = 'ocr' | 'sample' | 'uploads' | 'rendered'
+export type PresignSection = 'uploads' | 'rendered'
 
-/** Request a presigned PUT URL so the browser can upload straight to MinIO. */
+/** Request a presigned POST policy so the browser can upload straight to MinIO. */
 export async function presignUpload(
   payload: { filename: string; content_type: string; size: number; section: PresignSection },
 ): Promise<PresignResult> {
@@ -19,13 +21,15 @@ export async function presignUpload(
   })
 }
 
-/** Upload a File to a presigned PUT url (MinIO). */
-export async function uploadToPresigned(url: string, file: File): Promise<Response> {
-  return fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type || 'application/octet-stream' },
-    body: file,
-  })
+/**
+ * Upload a File with a presigned POST policy (MinIO). MinIO enforces the
+ * policy's key, content type and size limit, so the file must come last.
+ */
+export async function uploadToPresigned(presign: PresignResult, file: File): Promise<Response> {
+  const form = new FormData()
+  for (const [name, value] of Object.entries(presign.fields)) form.append(name, value)
+  form.append('file', file)
+  return fetch(presign.url, { method: 'POST', body: form })
 }
 
 /** Fetch a short-lived presigned GET URL for an object key (e.g. 'ocr/<id>.png'). */

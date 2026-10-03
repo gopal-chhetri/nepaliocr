@@ -1,6 +1,6 @@
 import time
 import logging
-from app.services.ocr.base import OCRProvider, OCRResult
+from app.services.ocr.base import OCREngineError, OCRProvider, OCRResult
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +29,12 @@ class PaddleOCRProvider(OCRProvider):
     async def extract_text(self, image_bytes: bytes) -> OCRResult:
         await self._lazy_init()
         if self._model is None:
-            return OCRResult(
-                text="PaddleOCR is not available",
-                engine="paddleocr",
-                processing_time_ms=0,
-            )
+            raise OCREngineError("PaddleOCR is not installed")
 
         start = time.time()
         try:
-            import tempfile, os
+            import tempfile
+            import os
             from PIL import Image
             import io
 

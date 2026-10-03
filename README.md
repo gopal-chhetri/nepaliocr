@@ -1,6 +1,26 @@
 # NepaliOCR
 
-Web app that extracts text from images of Nepali (Devanagari-script) documents using AI. Client-side navigation uses TanStack Router with **history (pushState) routing** — clean URLs like `/ocr`, `/about`, `/contribute` (no `#` hash fragments).
+## System Architecture
+
+```mermaid
+graph TD
+    User[User / Client Frontend] -->|1. Request Upload| FastAPI[FastAPI Backend]
+    FastAPI -->|2. Generate Presigned URL| MinIO[MinIO Object Storage]
+    User -->|3. Direct PUT Image| MinIO
+    User -->|4. Request OCR (image_key)| FastAPI
+    FastAPI -->|5. Forward Image URL| OpenRouter[OpenRouter / Gemini API]
+    OpenRouter -->|6. Return Extracted Text| FastAPI
+    FastAPI -->|7. Save Result / Quota| PostgreSQL[(PostgreSQL DB)]
+    FastAPI -->|8. Increment Quota / Rate Limits| Redis[(Redis Cache)]
+    
+    subgraph Background Workers
+        FastAPI -->|Enqueue Line Segmentation| ARQ[arq Queue]
+        ARQ --> OpenCV[OpenCV Worker]
+        OpenCV -->|Read Raw Image| MinIO
+        OpenCV -->|Segment into lines| OpenCV
+        OpenCV -->|Upload segments| MinIO
+    end
+```
 
 ## Features
 
@@ -67,11 +87,11 @@ The app shell mounts the `Navbar` once at the **root layout** (`<Navbar />` + `<
 | `POST` | `/api/v1/auth/login` | Get JWT token | None |
 | `POST` | `/api/v1/ocr` | Extract text from image (`image` file **or** `image_key`) | Optional (higher quota if authed) |
 | `GET` | `/api/v1/usage` | Current daily quota usage (`limit`, `used`, `remaining`) | Optional |
-| `POST` | `/api/v1/annotate` | Register a sample (`image_key`, `expected_text?`, `ocr_text?`, `lines?`) | Optional |
+| `POST` | `/api/v1/annotate` | Register a sample (`image_key`, `expected_text?`, `ocr_text?`, `lines?`) | **Required** |
 | `GET` | `/api/v1/annotate/next` | Next un-annotated sample (`sample_id`, `image_url`, counts); 404 when exhausted | Optional |
-| `POST` | `/api/v1/annotate/{sample_id}` | Submit annotation text for a sample | Optional |
-| `POST` | `/api/v1/storage/presign-upload` | Get presigned PUT URL to upload an image to MinIO | Optional |
-| `POST` | `/api/v1/storage/presign-get` | Get presigned GET URL for an object key | Optional |
+| `POST` | `/api/v1/annotate/{segment_id}` | Submit annotation text for a line (409 if already annotated) | **Required** |
+| `POST` | `/api/v1/storage/presign-upload` | Get a presigned POST policy (`url` + `fields`) to upload a contribution image to MinIO; size and type are enforced by MinIO | Optional |
+| `POST` | `/api/v1/storage/presign-get` | Get presigned GET URL for an object key (not available for `ocr/` images) | Optional |
 | `GET` | `/api/health` | Service health + dependency + engine status | None |
 | `GET` | `/api/healthz` | Liveness (always 200) | None |
 
@@ -119,10 +139,15 @@ curl -X POST http://localhost:8000/api/v1/ocr \
 
 ### MinIO object flow
 
-1. `POST /api/v1/storage/presign-upload` with `{filename, content_type, size, purpose}` → `{key, url}` (5-min presigned PUT)
-2. Client `PUT`s the bytes directly to the returned URL (browser-reachable endpoint)
-3. `POST /api/v1/ocr` with `image_key` (+ `purpose=sample` to relocate under `samples/`)
-4. `POST /api/v1/storage/presign-get` returns a short-lived GET URL for display
+1. `POST /api/v1/storage/presign-upload` with `{filename, content_type, size, section}` → `{key, url, fields}` (5-min presigned POST policy; `section` is `uploads` or `rendered`)
+2. Client `POST`s multipart form data to `url`: every entry of `fields`, then the file as `file`
+3. `POST /api/v1/contributions` with the `image_key` to queue line segmentation for annotation
+
+Images sent to the OCR tool are stored under `ocr/`, never added to the annotation dataset, and deleted after 1 day by a MinIO lifecycle rule (see the privacy page).
+
+## Database migrations
+
+The schema is managed with Alembic (`backend/alembic/`). Both backend Dockerfiles run `alembic upgrade head` before starting the API. To add a migration: `cd backend && alembic revision -m "describe change"`.
 
 ## Production
 

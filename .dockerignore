@@ -6,3 +6,8 @@ dist/
 deployments/*/.env
 **/*.env.example
 *.log
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+backend/logs

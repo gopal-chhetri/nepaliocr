@@ -5,8 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.params import Depends
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from app.core.rate_limit import limiter
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -18,7 +17,6 @@ from app.services.auth.jwt_handler import extract_user_from_request
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/contributions", tags=["contributions"])
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 
 class ContributionCreate(BaseModel):

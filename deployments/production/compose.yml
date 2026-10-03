@@ -1,6 +1,11 @@
+# NepaliOCR Production Docker Compose Setup
+# Orchestrates Postgres, Redis, MinIO S3 storage, FastAPI backend, arq background worker, and React frontend.
+# Routes traffic securely via Traefik ingress container with Let's Encrypt SSL resolver.
+
 name: nepaliocr
 
 services:
+  # Relational Database storing OCR results, user data, and annotation samples.
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -16,6 +21,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # In-memory Redis cache for rate limiting, quotas, and worker queue tracking.
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -27,6 +33,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Self-hosted MinIO object storage (S3-compatible) for raw uploads and segmented lines.
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -44,6 +51,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-network"
+      # S3 API routing (e.g. presigned URLs)
       - "traefik.http.routers.nepaliocr_minio_http.entrypoints=http"
       - "traefik.http.routers.nepaliocr_minio_http.rule=Host(`$MINIO_DOMAIN`)"
       - "traefik.http.routers.nepaliocr_minio_https.entrypoints=https"
@@ -53,6 +61,7 @@ services:
       - "traefik.http.routers.nepaliocr_minio_https.service=nepaliocr_minio"
       - "traefik.http.services.nepaliocr_minio.loadbalancer.server.port=9000"
       - "traefik.http.routers.nepaliocr_minio_http.middlewares=https-redirect"
+      # MinIO Console admin panel UI routing
       - "traefik.http.routers.nepaliocr_minio_console_http.entrypoints=http"
       - "traefik.http.routers.nepaliocr_minio_console_http.rule=Host(`$MINIO_CONSOLE_DOMAIN`)"
       - "traefik.http.routers.nepaliocr_minio_console_http.middlewares=https-redirect"
@@ -66,10 +75,12 @@ services:
       - default
       - traefik-network
 
+  # FastAPI Backend API executing OCR queries and dispatching segmentation jobs.
   backend:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
+      ENVIRONMENT: production
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       JWT_SECRET: ${JWT_SECRET}
@@ -96,6 +107,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-network"
+      # Ingress rule to route `/api/*` to the FastAPI backend API
       - "traefik.http.routers.nepaliocr_api_http.entrypoints=http"
       - "traefik.http.routers.nepaliocr_api_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.nepaliocr_api_https.entrypoints=https"
@@ -109,11 +121,13 @@ services:
       - default
       - traefik-network
 
+  # Background Worker running OpenCV line segmentation via arq.
   worker:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     command: ["python", "-m", "arq", "app.jobs.WorkerSettings"]
     environment:
+      ENVIRONMENT: production
       OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       JWT_SECRET: ${JWT_SECRET}
@@ -140,6 +154,7 @@ services:
     networks:
       - default
 
+  # Nginx container hosting the static React/Vite build assets.
   frontend:
     image: ghcr.io/${REGISTRY_OWNER:-gopal-chhetri}/nepaliocr-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -148,6 +163,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-network"
+      # Main frontend routing on root path Host rule
       - "traefik.http.routers.nepaliocr_http.entrypoints=http"
       - "traefik.http.routers.nepaliocr_http.rule=Host(`${DOMAIN:-ocr.soylab.dpdns.org}`)"
       - "traefik.http.routers.nepaliocr_https.entrypoints=https"
@@ -167,5 +183,6 @@ volumes:
   minio_data:
 
 networks:
+  # Shares Traefik-managed network with other services on the server.
   traefik-network:
     external: true

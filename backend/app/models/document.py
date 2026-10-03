@@ -39,6 +39,7 @@ class Segment(Base):
     expected_text = Column(Text, nullable=True)
     annotated_text = Column(Text, nullable=True)
     annotated_at = Column(DateTime(timezone=True), nullable=True)
+    annotated_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     is_extra = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

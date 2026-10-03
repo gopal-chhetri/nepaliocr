@@ -3,15 +3,13 @@ import logging
 
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel, Field
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from app.core.rate_limit import limiter
 from app.services import storage
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/storage", tags=["storage"])
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 CONTENT_TO_EXT = {
     "image/jpeg": "jpg",
@@ -23,7 +21,8 @@ class PresignUploadRequest(BaseModel):
     filename: str = Field(default="image.jpg", max_length=255)
     content_type: str
     size: int = Field(gt=0)
-    section: str = Field(default="ocr", pattern="^(ocr|sample|uploads|rendered)$")
+    # Contribution images only; OCR images go through POST /ocr directly.
+    section: str = Field(default="uploads", pattern="^(uploads|rendered)$")
 
 
 class PresignGetRequest(BaseModel):
@@ -32,7 +31,9 @@ class PresignGetRequest(BaseModel):
 
 class PresignUploadResponse(BaseModel):
     key: str
+    # POST multipart/form-data to `url`: every entry of `fields`, then `file`.
     url: str
+    fields: dict[str, str]
     expires_in: int
 
 
@@ -55,16 +56,14 @@ async def presign_upload(request: Request, body: PresignUploadRequest):
         )
 
     prefix = {
-        "ocr": "ocr/",
-        "sample": "samples/",
         "uploads": "uploads/",
         "rendered": "rendered/",
     }[body.section]
     ext = CONTENT_TO_EXT[body.content_type]
     key = f"{prefix}{uuid.uuid4().hex}.{ext}"
 
-    url = await storage.presign_put(key)
-    return PresignUploadResponse(key=key, url=url, expires_in=300)
+    fields = await storage.presign_post(key, body.content_type, settings.MAX_IMAGE_SIZE)
+    return PresignUploadResponse(key=key, url=storage.public_bucket_url(), fields=fields, expires_in=300)
 
 
 @router.post("/presign-get", response_model=PresignGetResponse)

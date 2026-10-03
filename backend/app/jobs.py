@@ -6,7 +6,7 @@ from arq.connections import RedisSettings
 from sqlalchemy import func as sa_func
 
 from app.core.config import settings
-from app.core.database import ensure_schema, get_session_factory
+from app.core.database import get_engine, get_session_factory
 from app.models.document import Document, Segment
 from app.services import storage
 from app.services.segmentation import segment_lines
@@ -16,15 +16,12 @@ logger = logging.getLogger(__name__)
 _pool = None
 
 
-async def startup(ctx) -> None:
-    await ensure_schema()
-
-
 async def shutdown(ctx) -> None:
     global _pool
     if _pool is not None:
         await _pool.aclose()
         _pool = None
+    await get_engine().dispose()
 
 
 async def segment_document(ctx, document_id: str) -> None:
@@ -91,8 +88,7 @@ async def enqueue_segmentation(document_id) -> None:
 class WorkerSettings:
     functions = [segment_document]
     redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
-    on_startup = startup
-    on_shutdown = None
+    on_shutdown = shutdown
     max_jobs = 2
     job_timeout = 30
     keep_result = 0

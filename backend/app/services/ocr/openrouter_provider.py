@@ -1,9 +1,8 @@
 import time
 import base64
 import logging
-import json
 import httpx
-from app.services.ocr.base import OCRProvider, OCRResult
+from app.services.ocr.base import OCREngineError, OCRProvider, OCRResult
 from app.core.config import settings
 from app.utils.api_key_rotator import APIKeyRotator
 
@@ -24,11 +23,7 @@ class OpenRouterProvider(OCRProvider):
 
     async def extract_text(self, image_bytes: bytes) -> OCRResult:
         if not self._available:
-            return OCRResult(
-                text="OpenRouter is not configured",
-                engine="openrouter",
-                processing_time_ms=0,
-            )
+            raise OCREngineError("OpenRouter is not configured")
 
         start = time.time()
         api_key = self.key_rotator.get_next_key()
@@ -111,6 +106,6 @@ class OpenRouterProvider(OCRProvider):
 
         if last_error:
             self.key_rotator.mark_key_as_failed(api_key, last_error)
-            raise RuntimeError(last_error)
+            raise OCREngineError(last_error)
 
-        raise RuntimeError("OpenRouter failed across all candidate models")
+        raise OCREngineError("OpenRouter failed across all candidate models")

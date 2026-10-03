@@ -15,6 +15,8 @@ import {
 import { presignUpload, uploadToPresigned } from '@/lib/storage-api'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'sonner'
+import { Link } from '@tanstack/react-router'
+import { useAuth } from '@/lib/auth-context'
 
 const clampLines = (n: number) => Math.min(Math.max(n || 1, 1), 20)
 
@@ -141,7 +143,7 @@ function DataCollection() {
           size: file.size,
           section: 'uploads',
         })
-        const res = await uploadToPresigned(presign.url, file)
+        const res = await uploadToPresigned(presign, file)
         if (!res.ok) throw new Error(`Upload failed (${res.status})`)
         setHandwrittenKey(presign.key)
         toast.success('Image uploaded')
@@ -522,6 +524,7 @@ async function waitForSegmentation(id: string): Promise<Contribution | null> {
 /* ------------------------------ Annotation ------------------------------ */
 
 function Annotation() {
+  const { isAuthenticated } = useAuth()
   const [current, setCurrent] = useState<NextAnnotationResponse | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'none' | 'done' | 'error'>('loading')
   const [error, setError] = useState('')
@@ -555,7 +558,10 @@ function Annotation() {
       toast.success('Annotation submitted')
       await loadNext()
     } catch (e: any) {
-      toast.error(e.message || 'Failed to submit annotation')
+      const message: string = e.message || 'Failed to submit annotation'
+      toast.error(message)
+      // Someone else labelled this line first; move on to the next one.
+      if (message.includes('already been annotated')) await loadNext(skipExcluded)
     } finally {
       setSubmitting(false)
     }
@@ -590,7 +596,8 @@ function Annotation() {
           size="sm"
           className="rounded-lg"
           onClick={handleSubmit}
-          disabled={submitting || state !== 'ready' || !text.trim()}
+          disabled={!isAuthenticated || submitting || state !== 'ready' || !text.trim()}
+          title={isAuthenticated ? undefined : 'Sign in to submit annotations'}
         >
           {submitting ? (
             <CircleNotch size={14} className="mr-1.5 animate-spin" />
@@ -602,6 +609,14 @@ function Annotation() {
       </div>
 
       <div className="p-5">
+        {!isAuthenticated && (
+          <p className="mb-4 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <Link to="/login" className="font-medium text-accent hover:underline">
+              Sign in
+            </Link>{' '}
+            to submit annotations. You can still browse lines without an account.
+          </p>
+        )}
         {state === 'loading' && (
           <div className="flex flex-col items-center justify-center py-16 gap-2">
             <CircleNotch size={22} className="animate-spin text-accent/70" />

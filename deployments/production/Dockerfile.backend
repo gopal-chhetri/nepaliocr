@@ -12,4 +12,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY backend/ .
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Apply DB migrations, then serve. --proxy-headers takes the client IP from
+# Traefik's X-Forwarded-For; only Traefik can reach this container, so every
+# forwarder is trusted.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"]

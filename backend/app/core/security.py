@@ -1,9 +1,12 @@
-from fastapi import Request, HTTPException
-from fastapi.responses import JSONResponse
-import redis.asyncio as redis
-from app.core.config import settings
-import time
 import logging
+import time
+from collections.abc import Awaitable, Callable
+
+import redis.asyncio as redis
+from fastapi import HTTPException, Request
+
+from app.core.config import settings
+from app.core.rate_limit import client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -17,57 +20,68 @@ async def get_redis():
     return _redis_pool
 
 
-async def check_daily_quota(request: Request) -> tuple[str, int]:
+def _quota_subject(request: Request) -> tuple[str, int, bool]:
+    """(identifier, daily limit, is_authenticated) for the caller."""
     user = getattr(request.state, "user", None)
-    client_ip = request.client.host if request.client else "unknown"
-
     if user:
-        identifier = f"user:{user['id']}"
-        limit = settings.DAILY_LIMIT_AUTHENTICATED
-    else:
-        identifier = f"ip:{client_ip}"
-        limit = settings.DAILY_LIMIT_ANONYMOUS
+        return f"user:{user['id']}", settings.DAILY_LIMIT_AUTHENTICATED, True
+    return f"ip:{client_ip(request)}", settings.DAILY_LIMIT_ANONYMOUS, False
+
+
+def _seconds_until_utc_midnight() -> int:
+    now = time.time()
+    return max(1, int(86400 - (now % 86400)))
+
+
+async def _noop() -> None:
+    return None
+
+
+async def reserve_daily_quota(request: Request) -> tuple[int, Callable[[], Awaitable[None]]]:
+    """Atomically take one OCR from today's quota.
+
+    Returns (remaining, release); call release() if the request then fails so
+    the attempt doesn't count. Raises 429 when the quota is used up.
+    """
+    identifier, limit, authenticated = _quota_subject(request)
+    key = f"ocr_daily:{identifier}"
 
     try:
         r = await get_redis()
-        key = f"ocr_daily:{identifier}"
-        current = await r.get(key)
-        if current is None:
-            now = time.time()
-            midnight = int(now - (now % 86400) + 86400)
-            ttl = int(midnight - now)
-            await r.setex(key, ttl, 1)
-            remaining = limit - 1
-        else:
-            current_val = int(current)
-            if current_val >= limit:
-                raise HTTPException(
-                    status_code=429,
-                    detail={
-                        "detail": "Daily limit reached. Register for a higher quota." if not user else "Daily limit reached. Try again tomorrow.",
-                        "retry_after": "midnight UTC",
-                    },
-                )
-            await r.incr(key)
-            remaining = limit - current_val - 1
-        return identifier, max(0, remaining)
-    except HTTPException:
-        raise
+        async with r.pipeline(transaction=True) as pipe:
+            pipe.incr(key)
+            pipe.expire(key, _seconds_until_utc_midnight(), nx=True)
+            used, _ = await pipe.execute()
     except Exception as e:
-        logger.warning(f"Redis unavailable for quota check: {e}")
-        return identifier, limit
+        # Anonymous OCR spends the paid API budget, so don't run it unmetered.
+        if not authenticated:
+            logger.error(f"Redis unavailable for quota check, refusing anonymous OCR: {e}")
+            raise HTTPException(status_code=503, detail="Service temporarily unavailable") from None
+        logger.warning(f"Redis unavailable for quota check, allowing signed-in user: {e}")
+        return limit, _noop
+
+    async def release() -> None:
+        try:
+            await r.decr(key)
+        except Exception as e:
+            logger.warning(f"Failed to release quota for {identifier}: {e}")
+
+    if used > limit:
+        await release()
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "detail": "Daily limit reached. Try again tomorrow."
+                if authenticated
+                else "Daily limit reached. Register for a higher quota.",
+                "retry_after": "midnight UTC",
+            },
+        )
+    return max(0, limit - used), release
 
 
 async def get_daily_usage(request: Request) -> dict:
-    user = getattr(request.state, "user", None)
-    client_ip = request.client.host if request.client else "unknown"
-
-    if user:
-        identifier = f"user:{user['id']}"
-        limit = settings.DAILY_LIMIT_AUTHENTICATED
-    else:
-        identifier = f"ip:{client_ip}"
-        limit = settings.DAILY_LIMIT_ANONYMOUS
+    identifier, limit, _ = _quota_subject(request)
 
     used = 0
     try:
@@ -83,12 +97,3 @@ async def get_daily_usage(request: Request) -> dict:
         "used": min(used, limit),
         "remaining": max(0, limit - used),
     }
-
-
-async def get_rate_limit_middleware():
-    from slowapi import Limiter
-    from slowapi.util import get_remote_address
-    from slowapi.middleware import SlowAPIMiddleware
-
-    limiter = Limiter(key_func=get_remote_address, default_limits=[])
-    return limiter, SlowAPIMiddleware

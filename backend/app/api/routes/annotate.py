@@ -3,23 +3,21 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, Request, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func as sa_func
+from sqlalchemy import select, update, func as sa_func
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.params import Depends
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from app.core.rate_limit import limiter
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.sample import Sample
 from app.models.document import Segment
 from app.services import storage
-from app.services.auth.jwt_handler import extract_user_from_request
+from app.services.auth.jwt_handler import extract_user_from_request, require_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/annotate", tags=["annotate"])
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 
 class SampleCreate(BaseModel):
@@ -51,7 +49,7 @@ class NextAnnotationResponse(BaseModel):
 
 
 class AnnotationSubmit(BaseModel):
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=2000)
 
 
 class AnnotationSubmitResponse(BaseModel):
@@ -63,8 +61,7 @@ class AnnotationSubmitResponse(BaseModel):
 @limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def create_sample(request: Request, body: SampleCreate, db: AsyncSession = Depends(get_db)):
     """Legacy endpoint to register a standalone sample (kept for existing dev data)."""
-    user = await extract_user_from_request(request)
-    request.state.user = user
+    await require_user(request)
 
     await storage.validate_key(body.image_key)
     if not await storage.object_exists(body.image_key):
@@ -113,7 +110,7 @@ async def next_annotation(
         try:
             excluded_ids = [uuid.UUID(part.strip()) for part in exclude.split(",") if part.strip()]
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid segment id in exclude")
+            raise HTTPException(status_code=400, detail="Invalid segment id in exclude") from None
         if excluded_ids:
             stmt = stmt.where(Segment.id.notin_(excluded_ids))
     stmt = stmt.order_by(sa_func.random()).limit(1)
@@ -147,15 +144,29 @@ async def next_annotation(
 async def submit_annotation(
     request: Request, segment_id: str, body: AnnotationSubmit, db: AsyncSession = Depends(get_db)
 ):
-    user = await extract_user_from_request(request)
-    request.state.user = user
+    user = await require_user(request)
 
-    segment = await db.get(Segment, segment_id)
-    if segment is None:
-        raise HTTPException(status_code=404, detail="Segment not found")
+    try:
+        segment_uuid = uuid.UUID(segment_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Segment not found") from None
 
-    segment.annotated_text = body.text.strip()
-    segment.annotated_at = sa_func.now()
+    # Conditional update so a label is never overwritten, even by two
+    # annotators submitting the same segment at once.
+    result = await db.execute(
+        update(Segment)
+        .where(Segment.id == segment_uuid, Segment.annotated_text.is_(None))
+        .values(
+            annotated_text=body.text.strip(),
+            annotated_at=sa_func.now(),
+            annotated_by=uuid.UUID(user["id"]),
+        )
+    )
+    if result.rowcount == 0:
+        await db.rollback()
+        if await db.get(Segment, segment_uuid) is None:
+            raise HTTPException(status_code=404, detail="Segment not found")
+        raise HTTPException(status_code=409, detail="This line has already been annotated")
     await db.commit()
 
     remaining = int(

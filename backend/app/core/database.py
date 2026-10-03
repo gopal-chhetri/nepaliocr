@@ -1,4 +1,5 @@
 import logging
+from collections.abc import AsyncIterator
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -25,17 +26,10 @@ def get_session_factory():
     return _session_local
 
 
-async def ensure_schema() -> None:
-    from app import models  # noqa: F401  (registers all model tables)
-
-    engine = get_engine()
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
-
-
-async def get_db() -> AsyncSession:
-    await ensure_schema()
-    return get_session_factory()()
+async def get_db() -> AsyncIterator[AsyncSession]:
+    """FastAPI dependency: one session per request, always closed afterwards."""
+    async with get_session_factory()() as session:
+        yield session
 
 
 async def ping_database() -> bool:
