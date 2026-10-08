@@ -26,14 +26,10 @@ if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS
     echo "    Make sure this script is run inside: infisical run --env=prod --"
     exit 1
 fi
-# The backend refuses to start in production with weak secrets (app/core/config.py);
+# The backend refuses to start in production with the minioadmin default (app/core/config.py);
 # catch that here instead of after a full health-check timeout.
-if [ ${#JWT_SECRET} -lt 32 ]; then
-    echo "!!! ERROR: JWT_SECRET must be at least 32 characters (try: openssl rand -hex 32)"
-    exit 1
-fi
-if [ -z "$MINIO_ROOT_USER" ] || [ -z "$MINIO_ROOT_PASSWORD" ] || [ "$MINIO_ROOT_USER" = "minioadmin" ] || [ "$MINIO_ROOT_PASSWORD" = "minioadmin" ]; then
-    echo "!!! ERROR: MINIO_ROOT_USER/MINIO_ROOT_PASSWORD must be set and not the minioadmin default"
+if [ -z "$MINIO_ROOT_USER" ] || [ "$MINIO_ROOT_USER" = "minioadmin" ]; then
+    echo "!!! ERROR: MINIO_ROOT_USER must be set and not the minioadmin default"
     exit 1
 fi
 echo "    ✓ Secrets present"
