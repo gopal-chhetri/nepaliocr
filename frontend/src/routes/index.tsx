@@ -9,15 +9,14 @@ export function HomePage() {
     <div className="min-h-screen bg-background">
       <Hero />
       <Features />
-      <section id="ocr" className="py-24 bg-secondary/30 border-y border-border">
+      <section id="ocr" className="py-24 bg-secondary/40 border-y border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
-              Nepali OCR Converter
+            <h2 className="text-3xl sm:text-4xl font-serif-display font-bold text-foreground">
+              Try it here
             </h2>
-            <span className="chalk-underline block mx-auto w-20 h-1 mt-2 mb-4" />
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Upload your document and watch as it's transformed into digital text in seconds.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Drop an image of a Nepali page below. The text appears next to it.
             </p>
           </div>
           <OcrUpload />

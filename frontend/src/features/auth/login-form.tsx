@@ -36,11 +36,11 @@ export function LoginForm() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="notebook-card rounded-xl shadow-lg p-8">
+        <div className="notebook-card rounded-md shadow-lg p-8">
           <div className="devanagari-frieze text-xs mb-4 opacity-20 justify-center">
             {DEV_LOGIN_SHUFFLED.map((ch, i) => <span key={i}>{ch}</span>)}
           </div>
-          <h2 className="text-3xl font-serif-display font-bold text-center mb-2 chalk-text">Welcome Back</h2>
+          <h2 className="text-3xl font-serif-display font-bold text-center mb-2">Welcome Back</h2>
           <p className="text-muted-foreground text-center mb-8">Sign in to continue using NepaliOCR</p>
 
           {error && (

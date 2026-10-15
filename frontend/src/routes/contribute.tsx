@@ -26,18 +26,17 @@ export function ContributePage() {
     <div className="min-h-screen bg-background">
       <div className="pt-24 pb-16 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="text-center space-y-4 mb-10">
-          <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
+          <h2 className="text-3xl sm:text-4xl font-serif-display font-bold text-foreground">
             Contribute
           </h2>
-          <span className="chalk-underline block mx-auto w-20 h-1 mt-2 mb-4" />
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Generate Nepali sentences, capture them as images (handwriting or AI-rendered), and
             annotate the extracted lines to build ground-truth training data.
           </p>
         </div>
 
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-xl border border-border bg-card/80 p-1">
+          <div className="inline-flex rounded-md border border-border bg-card p-1">
             <TabButton active={activeTab === 'collect'} onClick={() => setActiveTab('collect')}>
               <DotsThree size={15} /> Data Collection
             </TabButton>
@@ -180,7 +179,7 @@ function DataCollection() {
       setContribution(done)
       if (done?.status === 'segmented') toast.success('Lines extracted & saved')
       else if (done?.status === 'error') toast.error(done.error || 'Extraction failed')
-      else toast.warning('Still processing — refresh to see progress')
+      else toast.warning('Still processing. Refresh to see progress.')
     } catch (e: any) {
       toast.error(e.message || 'Failed to save contribution')
     } finally {
@@ -191,11 +190,11 @@ function DataCollection() {
   return (
     <div className="space-y-6">
       {/* Generate card */}
-      <div className="rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-xl overflow-hidden">
+      <div className="rounded-lg border border-border/70 bg-card shadow-sm overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/60">
           <div className="flex items-center gap-2">
             <DotsThree className="text-accent" size={18} />
-            <h3 className="text-sm font-semibold text-foreground chalk-text">Generate Nepali Sentence</h3>
+            <h3 className="text-sm font-semibold text-foreground">Generate Nepali Sentence</h3>
           </div>
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -210,13 +209,13 @@ function DataCollection() {
               />
             </label>
             <Button variant="chalk" size="sm" className="rounded-lg" onClick={handleGenerate}>
-              <Eyedropper size={14} className="mr-1.5" /> Generate
+              <Eyedropper size={14} className="mr-2" /> Generate
             </Button>
           </div>
         </div>
         <div className="p-5">
           {snippetLines.length ? (
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-1.5">
+            <div className="rounded-md border border-border/60 bg-muted/20 p-4 space-y-1">
               {snippetLines.map((line, i) => (
                 <p key={i} className="text-lg font-devanagari leading-relaxed text-foreground" lang="ne">
                   {line}
@@ -229,19 +228,19 @@ function DataCollection() {
             </p>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Each line is shown separately — write exactly these lines on paper (or use the AI-rendered version) for the collection.
+            Each line is shown separately. Write exactly these lines on paper (or use the AI-rendered version) for the collection.
           </p>
         </div>
       </div>
 
       {/* Source card */}
-      <div className="rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-xl overflow-hidden">
+      <div className="rounded-lg border border-border/70 bg-card shadow-sm overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/60">
           <div className="flex items-center gap-2">
             <Camera className="text-accent" size={18} />
-            <h3 className="text-sm font-semibold text-foreground chalk-text">Image source</h3>
+            <h3 className="text-sm font-semibold text-foreground">Image source</h3>
           </div>
-          <div className="inline-flex rounded-lg border border-border bg-muted/20 p-0.5">
+          <div className="inline-flex rounded-lg border border-border bg-muted/20 p-0">
             <SourceTab active={sourceMode === 'handwritten'} onClick={() => setSourceMode('handwritten')}>
               Hand-written
             </SourceTab>
@@ -257,9 +256,9 @@ function DataCollection() {
             disabled={submitPending || uploading || (sourceMode === 'ai' ? !aiImageKey : !handwrittenKey)}
           >
             {submitPending ? (
-              <CircleNotch size={14} className="mr-1.5 animate-spin" />
+              <CircleNotch size={14} className="mr-2 animate-spin" />
             ) : (
-              <FloppyDiskBack size={14} className="mr-1.5" />
+              <FloppyDiskBack size={14} className="mr-2" />
             )}
             Extract & Save
           </Button>
@@ -267,11 +266,11 @@ function DataCollection() {
         <div className="p-5">
           {sourceMode === 'handwritten' ? (
             <div className="space-y-4">
-              <label className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center cursor-pointer hover:border-accent/50 transition-colors min-h-56">
+              <label className="flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center cursor-pointer hover:border-accent/50 transition-colors min-h-56">
                 <Camera size={32} className="text-accent/70" />
                 <span className="text-sm text-muted-foreground">
                   {fileInfo
-                    ? 'Uploaded — you can replace the photo'
+                    ? 'Uploaded. You can still replace the photo.'
                     : 'Snap a photo of your handwritten lines or choose an image'}
                 </span>
                 <input
@@ -283,7 +282,7 @@ function DataCollection() {
                 />
               </label>
               {fileInfo && (
-                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                   <img
                     src={fileInfo.preview}
                     alt="Handwritten upload"
@@ -304,7 +303,7 @@ function DataCollection() {
           ) : (
             <div className="space-y-4">
               {!genImage && !aiRendering && (
-                <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center min-h-56">
+                <div className="flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed border-border/60 bg-muted/10 p-8 text-center min-h-56">
                   <Crosshair size={32} className="text-accent/70" />
                   <span className="text-sm text-muted-foreground max-w-md leading-relaxed">
                     Render the generated Nepali lines above as an image and run an OCR sanity check before saving.
@@ -317,7 +316,7 @@ function DataCollection() {
                       onClick={renderAndOcr}
                       disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
                     >
-                      <Crosshair size={14} className="mr-1.5" /> Render & OCR Test
+                      <Crosshair size={14} className="mr-2" /> Render & OCR Test
                     </Button>
                     <Button
                       variant="ghost"
@@ -325,7 +324,7 @@ function DataCollection() {
                       className="rounded-lg text-muted-foreground"
                       onClick={handleGenerate}
                     >
-                      <ArrowClockwise size={14} className="mr-1.5" /> Reset
+                      <ArrowClockwise size={14} className="mr-2" /> Reset
                     </Button>
                   </div>
                 </div>
@@ -334,7 +333,7 @@ function DataCollection() {
               {aiRendering && (
                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                   <CircleNotch size={28} className="animate-spin text-accent" />
-                  <p className="text-sm text-muted-foreground chalk-text">Processing Nepali text to image…</p>
+                  <p className="text-sm text-muted-foreground">Processing Nepali text to image…</p>
                 </div>
               )}
 
@@ -349,11 +348,11 @@ function DataCollection() {
                       disabled={!snippetLines.length || ocrMutation.isPending || aiRendering}
                     >
                       {aiRendering ? (
-                        <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                        <CircleNotch size={14} className="mr-2 animate-spin" />
                       ) : ocrMutation.isPending ? (
-                        <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                        <CircleNotch size={14} className="mr-2 animate-spin" />
                       ) : (
-                        <Crosshair size={14} className="mr-1.5" />
+                        <Crosshair size={14} className="mr-2" />
                       )}
                       {aiRendering ? 'Rendering…' : ocrMutation.isPending ? 'Analyzing…' : 'Render & OCR Test'}
                     </Button>
@@ -363,7 +362,7 @@ function DataCollection() {
                       className="rounded-lg text-muted-foreground"
                       onClick={handleGenerate}
                     >
-                      <ArrowClockwise size={14} className="mr-1.5" /> Reset
+                      <ArrowClockwise size={14} className="mr-2" /> Reset
                     </Button>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -372,25 +371,25 @@ function DataCollection() {
                     <img
                       src={genImage}
                       alt="Rendered"
-                      className="max-w-full h-32 object-contain mx-auto rounded-xl border border-border/60 bg-white dark:bg-black p-2"
+                      className="max-w-full h-32 object-contain mx-auto rounded-md border border-border/60 bg-white dark:bg-black p-2"
                     />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">OCR result</p>
                     {ocrMutation.isPending ? (
-                      <div className="rounded-xl border border-border/60 bg-muted/20 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2">
+                      <div className="rounded-md border border-border/60 bg-muted/20 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2">
                         <CircleNotch size={20} className="animate-spin text-accent" />
                         <p className="text-xs text-muted-foreground">Analyzing Devanagari text…</p>
                       </div>
                     ) : aiError ? (
-                      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2 text-center">
+                      <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 min-h-[90px] flex flex-col items-center justify-center gap-2 text-center">
                         <WarningCircle size={20} className="text-destructive" />
                         <p className="text-xs text-destructive">{aiError}</p>
                       </div>
                     ) : (
-                      <div className="rounded-xl border border-success/40 bg-success/5 p-3 min-h-[90px]">
+                      <div className="rounded-md border border-success/40 bg-success/5 p-3 min-h-[90px]">
                         {ocrText ? (
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {ocrText.split('\n').map((line, i) => (
                               <p key={i} className="text-base font-devanagari leading-relaxed text-foreground" lang="ne">
                                 {line}
@@ -424,9 +423,9 @@ function DataCollection() {
               disabled={submitPending || uploading || (sourceMode === 'ai' ? !aiImageKey : !handwrittenKey)}
             >
               {submitPending ? (
-                <CircleNotch size={14} className="mr-1.5 animate-spin" />
+                <CircleNotch size={14} className="mr-2 animate-spin" />
               ) : (
-                <FloppyDiskBack size={14} className="mr-1.5" />
+                <FloppyDiskBack size={14} className="mr-2" />
               )}
               Extract & Save for training
             </Button>
@@ -444,12 +443,12 @@ function DataCollection() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-xl overflow-hidden"
+            className="rounded-lg border border-border/70 bg-card shadow-sm overflow-hidden"
           >
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <TextAlignLeft className="text-accent" size={18} />
-                <h3 className="text-sm font-semibold text-foreground chalk-text">Extracted lines</h3>
+                <h3 className="text-sm font-semibold text-foreground">Extracted lines</h3>
               </div>
               <ContributionStatusBadge contribution={contribution} />
             </div>
@@ -484,7 +483,7 @@ function DataCollection() {
                     {contribution.segments.map((seg) => (
                       <div
                         key={seg.id}
-                        className={`rounded-xl border border-border/60 bg-muted/20 p-3 ${seg.is_extra ? 'opacity-80' : ''}`}
+                        className={`rounded-md border border-border/60 bg-muted/20 p-3 ${seg.is_extra ? 'opacity-80' : ''}`}
                       >
                         <img
                           src={seg.image_url}
@@ -492,11 +491,11 @@ function DataCollection() {
                           className="w-full h-16 object-contain bg-white dark:bg-black rounded-lg"
                         />
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-semibold text-muted-foreground uppercase">Line {seg.index + 1}</span>
+                          <span className="text-xs font-semibold text-muted-foreground uppercase">Line {seg.index + 1}</span>
                           {seg.is_extra ? (
-                            <span className="text-[10px] font-bold text-warning bg-warning/10 border border-warning/30 rounded-full px-2 py-0.5 uppercase">extra</span>
+                            <span className="text-xs font-semibold text-warning bg-warning/10 border border-warning/30 rounded-full px-2 py-0 uppercase">extra</span>
                           ) : seg.expected_text ? (
-                            <span className="text-[11px] font-devanagari text-muted-foreground truncate" lang="ne">{seg.expected_text}</span>
+                            <span className="text-xs font-devanagari text-muted-foreground truncate" lang="ne">{seg.expected_text}</span>
                           ) : null}
                         </div>
                       </div>
@@ -580,11 +579,11 @@ function Annotation() {
   }, [loadNext])
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-xl overflow-hidden">
+    <div className="rounded-lg border border-border/70 bg-card shadow-sm overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           <Images className="text-accent" size={18} />
-          <h3 className="text-sm font-semibold text-foreground chalk-text">Annotate a line image</h3>
+          <h3 className="text-sm font-semibold text-foreground">Annotate a line image</h3>
         </div>
         {current && (
           <span className="text-xs text-muted-foreground">
@@ -600,9 +599,9 @@ function Annotation() {
           title={isAuthenticated ? undefined : 'Sign in to submit annotations'}
         >
           {submitting ? (
-            <CircleNotch size={14} className="mr-1.5 animate-spin" />
+            <CircleNotch size={14} className="mr-2 animate-spin" />
           ) : (
-            <Upload size={14} className="mr-1.5" />
+            <Upload size={14} className="mr-2" />
           )}
           Submit
         </Button>
@@ -633,7 +632,7 @@ function Annotation() {
               contribution first.
             </p>
             <Button variant="outline" size="sm" className="rounded-lg mt-2" onClick={() => loadNext()}>
-              <ArrowClockwise size={14} className="mr-1.5" /> Check again
+              <ArrowClockwise size={14} className="mr-2" /> Check again
             </Button>
           </div>
         )}
@@ -642,10 +641,10 @@ function Annotation() {
           <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
             <CheckCircle size={40} className="text-success/70" />
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-              All images are annotated — nothing left to do. Nice work!
+              All images are annotated. Nothing left to do.
             </p>
             <Button variant="outline" size="sm" className="rounded-lg mt-2" onClick={() => loadNext()}>
-              <ArrowClockwise size={14} className="mr-1.5" /> Check again
+              <ArrowClockwise size={14} className="mr-2" /> Check again
             </Button>
           </div>
         )}
@@ -672,10 +671,10 @@ function Annotation() {
                 className="rounded-lg text-muted-foreground"
                 onClick={handleSkip}
               >
-                <SkipForward size={14} className="mr-1.5" /> Skip
+                <SkipForward size={14} className="mr-2" /> Skip
               </Button>
             </div>
-            <div className="rounded-xl border border-border/60 blackboard-frame bg-black/5 dark:bg-black/40 p-3 flex items-center justify-center">
+            <div className="rounded-md border border-border/60 blackboard-frame bg-black/5 dark:bg-black/40 p-3 flex items-center justify-center">
               <img
                 src={current.next.image_url}
                 alt="Line to annotate"
@@ -691,7 +690,7 @@ function Annotation() {
             />
             <Button
               variant="chalk"
-              className="w-full rounded-xl py-5 font-semibold shadow-lg"
+              className="w-full rounded-md py-5 font-semibold"
               onClick={handleSubmit}
               disabled={submitting || !text.trim()}
             >
@@ -715,7 +714,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
         active ? 'bg-accent text-accent-foreground shadow' : 'text-muted-foreground hover:text-foreground'
       }`}
     >
@@ -728,7 +727,7 @@ function SourceTab({ active, onClick, children }: { active: boolean; onClick: ()
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+      className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
         active ? 'bg-accent text-accent-foreground shadow' : 'text-muted-foreground hover:text-foreground'
       }`}
     >
@@ -746,7 +745,7 @@ function MatchBadge({ score }: { score: number | null }) {
         ? { cls: 'bg-warning/10 text-warning border-warning/30', label: 'Partial' }
         : { cls: 'bg-destructive/10 text-destructive border-destructive/30', label: 'Poor' }
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 border ${config.cls}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2 py-1 border ${config.cls}`}>
       Match {score}% · {config.label}
     </span>
   )
@@ -755,18 +754,18 @@ function MatchBadge({ score }: { score: number | null }) {
 function ContributionStatusBadge({ contribution }: { contribution: Contribution }) {
   if (contribution.status === 'segmented')
     return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 border bg-success/10 text-success border-success/30">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2 py-1 border bg-success/10 text-success border-success/30">
         <CheckCircle size={12} /> {contribution.lines_found ?? 0} lines
       </span>
     )
   if (contribution.status === 'error')
     return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 border bg-destructive/10 text-destructive border-destructive/30">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2 py-1 border bg-destructive/10 text-destructive border-destructive/30">
         <WarningCircle size={12} /> error
       </span>
     )
   return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 border bg-warning/10 text-warning border-warning/30">
+    <span className="inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2 py-1 border bg-warning/10 text-warning border-warning/30">
       <CircleNotch size={12} className="animate-spin" /> processing
     </span>
   )

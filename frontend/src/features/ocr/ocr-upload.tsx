@@ -107,12 +107,12 @@ export function OcrUpload() {
       </div>
 
       <div
-        className={`rounded-2xl border-2 transition-all duration-300 shadow-xl overflow-hidden ${
+        className={`rounded-lg border-2 transition-all duration-300 shadow-xl overflow-hidden ${
           isDragOver
-            ? 'border-accent bg-accent/10 dropzone-active scale-[1.01]'
+            ? 'border-accent bg-accent/10 dropzone-active'
             : previewUrl
-              ? 'border-border/80 bg-card/95 backdrop-blur-xl'
-              : 'border-dashed border-border/80 bg-card/70 backdrop-blur-md hover:border-accent/60 hover:bg-accent/5'
+              ? 'border-border/80 bg-card'
+              : 'border-dashed border-border/80 bg-card hover:border-accent/60 hover:bg-accent/5'
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
         onDragLeave={() => setIsDragOver(false)}
@@ -125,17 +125,17 @@ export function OcrUpload() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <FileArrowUp className="text-accent" size={18} />
-                  <h3 className="text-sm font-semibold text-foreground chalk-text">Source Document</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Source Document</h3>
                 </div>
                 <button
                   onClick={handleRemove}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                   aria-label="Remove image"
                 >
                   <X size={16} />
                 </button>
               </div>
-              <div className="relative rounded-xl blackboard-frame bg-black/5 dark:bg-black/40 border border-border/50 aspect-[4/3] flex items-center justify-center group">
+              <div className="relative rounded-md blackboard-frame bg-black/5 dark:bg-black/40 border border-border/50 aspect-[4/3] flex items-center justify-center group">
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -143,15 +143,15 @@ export function OcrUpload() {
                 />
                 <button
                   onClick={() => setIsFullPagePreview(true)}
-                  className="absolute bottom-3 right-3 p-2 rounded-lg bg-background/90 backdrop-blur-md border border-border/60 text-muted-foreground hover:text-foreground transition-colors shadow-md"
+                  className="absolute bottom-3 right-3 p-2 rounded-lg bg-background border border-border/60 text-muted-foreground hover:text-foreground transition-colors shadow-md"
                   aria-label="Zoom preview"
                 >
                   <MagnifyingGlassPlus size={16} />
                 </button>
                 {ocrMutation.isPending && (
-                  <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+                  <div className="absolute inset-0 bg-background/90 flex flex-col items-center justify-center gap-3">
                     <div className="scan-line" />
-                    <div className="flex items-center gap-2.5 text-xs font-semibold text-accent bg-background/90 px-5 py-2.5 rounded-lg border border-dashed border-accent/30 shadow-lg chalk-text">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-accent bg-background/90 px-5 py-2 rounded-lg border border-dashed border-accent/30">
                       <CircleNotch size={16} className="animate-spin" />
                       Analyzing Devanagari Script...
                     </div>
@@ -162,7 +162,7 @@ export function OcrUpload() {
               {!ocrMutation.isPending && !ocrMutation.isSuccess && (
                 <Button
                   variant="chalk"
-                  className="w-full mt-4 rounded-xl py-5 font-semibold shadow-lg"
+                  className="w-full mt-4 rounded-md py-5 font-semibold"
                   onClick={handleConvert}
                   disabled={ocrMutation.isPending}
                 >
@@ -177,7 +177,7 @@ export function OcrUpload() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Sparkle className="text-accent" size={18} />
-                  <h3 className="text-sm font-semibold text-foreground chalk-text">Extracted Result</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Extracted Result</h3>
                 </div>
                 <AnimatePresence>
                   {ocrMutation.data && (
@@ -205,7 +205,7 @@ export function OcrUpload() {
                   >
                     <div className="text-center space-y-3">
                       <CircleNotch size={36} className="animate-spin text-accent mx-auto" />
-                      <p className="text-sm text-muted-foreground font-medium chalk-text">Processing Devanagari text...</p>
+                      <p className="text-sm text-muted-foreground font-medium">Processing Devanagari text...</p>
                     </div>
                   </motion.div>
                 ) : ocrMutation.data ? (
@@ -217,16 +217,16 @@ export function OcrUpload() {
                     className="flex-1 flex flex-col gap-4 min-h-[220px]"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-success bg-success/10 border border-success/30 rounded-full px-2.5 py-1">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-success bg-success/10 border border-success/30 rounded-full px-2 py-1">
                         <CheckCircle size={12} /> Recognized
                       </span>
                       {ocrMutation.data.engine && (
-                        <span className="inline-flex items-center text-[11px] text-muted-foreground bg-muted/40 border border-border/60 rounded-full px-2.5 py-1">
+                        <span className="inline-flex items-center text-xs text-muted-foreground bg-muted/40 border border-border/60 rounded-full px-2 py-1">
                           {ocrMutation.data.engine}
                         </span>
                       )}
                     </div>
-                    <div className="flex-1 rounded-xl border border-border/60 bg-muted/20 p-4 overflow-auto min-h-[160px] ruled-lines margin-line">
+                    <div className="flex-1 rounded-md border border-border/60 bg-muted/20 p-4 overflow-auto min-h-[160px] ruled-lines margin-line">
                       <p
                         className="text-base leading-relaxed whitespace-pre-wrap font-devanagari text-foreground"
                         lang="ne"
@@ -251,7 +251,7 @@ export function OcrUpload() {
                           if (text) downloadText(`nepali-ocr-${Date.now()}.txt`, text)
                         }}
                       >
-                        <Download size={14} className="mr-1.5" /> Download .txt
+                        <Download size={14} className="mr-2" /> Download .txt
                       </Button>
                       <Button
                         variant="ghost"
@@ -260,7 +260,7 @@ export function OcrUpload() {
                         onClick={handleConvert}
                         disabled={!selectedFile || ocrMutation.isPending}
                       >
-                        <Sparkle size={14} className="mr-1.5" /> Re-run
+                        <Sparkle size={14} className="mr-2" /> Re-run
                       </Button>
                     </div>
                   </motion.div>
@@ -318,10 +318,10 @@ export function OcrUpload() {
               ))}
             </div>
 
-            <div className="p-5 rounded-2xl bg-accent/10 border border-dashed border-accent/30 mb-5 group-hover:scale-110 transition-transform duration-300">
+            <div className="p-5 rounded-lg bg-accent/10 border border-dashed border-accent/30 mb-5">
               <Upload className="h-9 w-9 text-accent" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2 chalk-text">
+            <h3 className="text-xl font-bold text-foreground mb-2">
               Upload Document Image
             </h3>
             <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm leading-relaxed">
@@ -329,7 +329,7 @@ export function OcrUpload() {
             </p>
             <Button
               variant="chalk"
-              className="font-semibold rounded-xl px-7 py-5 shadow-lg hover:shadow-xl transition-all"
+              className="font-semibold rounded-md px-7 py-5 shadow-sm"
             >
               Choose Image File
             </Button>
@@ -339,7 +339,7 @@ export function OcrUpload() {
 
       {isFullPagePreview && previewUrl && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
           onClick={() => setIsFullPagePreview(false)}
         >
           <div className="max-w-5xl max-h-[90vh] w-full h-full relative p-6">
@@ -375,7 +375,7 @@ export function OcrUpload() {
 function BadgePill({ usage }: { usage?: { limit: number; used: number; remaining: number } }) {
   const pct = usage ? Math.min(100, Math.round((usage.used / usage.limit) * 100)) : 0
   return (
-    <div className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-card/80 border border-border/70 rounded-full px-3 py-1.5 backdrop-blur">
+    <div className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-card border border-border rounded-full px-3 py-1">
       <span className={`h-2 w-2 rounded-full ${usage && usage.remaining === 0 ? 'bg-destructive' : pct >= 80 ? 'bg-warning' : 'bg-success'}`} />
       {usage ? (
         <>
@@ -390,7 +390,7 @@ function BadgePill({ usage }: { usage?: { limit: number; used: number; remaining
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/30 border border-border/60 rounded-lg px-2.5 py-1">
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 border border-border/60 rounded-lg px-2 py-1">
       <span className="font-semibold text-foreground">{value}</span> {label}
     </span>
   )

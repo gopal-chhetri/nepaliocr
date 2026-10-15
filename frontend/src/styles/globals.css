@@ -16,16 +16,17 @@
     --secondary-foreground: 30 20% 15%;
     --muted: 38 10% 82%;
     --muted-foreground: 30 8% 40%;
-    --accent: 45 55% 42%;
-    --accent-foreground: 30 20% 15%;
+    --accent: 40 80% 28%;
+    --accent-foreground: 40 30% 96%;
+    --accent-hover: 38 85% 21%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 40 15% 92%;
     --success: 140 50% 40%;
     --success-foreground: 40 15% 92%;
     --border: 38 10% 76%;
     --input: 38 10% 76%;
-    --ring: 45 55% 42%;
-    --radius: 0.75rem;
+    --ring: 40 80% 28%;
+    --radius: 0.5rem;
     --chalk-yellow: #C8A84C;
     --chalk-white: #F5F0E8;
     --blackboard: #6B4C3B;
@@ -46,6 +47,7 @@
     --muted-foreground: 30 6% 60%;
     --accent: 45 50% 52%;
     --accent-foreground: 30 18% 11%;
+    --accent-hover: 45 60% 62%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 40 12% 92%;
     --success: 140 50% 45%;
@@ -65,39 +67,12 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(0,0,0,0.025) 3px,
-        rgba(0,0,0,0.025) 4px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 3px,
-        rgba(0,0,0,0.018) 3px,
-        rgba(0,0,0,0.018) 4px
-      );
+    font-family: 'Mukta', system-ui, sans-serif;
+    font-size: 1.0625rem;
   }
-  .dark body {
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(255,255,255,0.018) 3px,
-        rgba(255,255,255,0.018) 4px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 3px,
-        rgba(255,255,255,0.012) 3px,
-        rgba(255,255,255,0.012) 4px
-      );
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
@@ -106,41 +81,13 @@
     text-wrap: balance;
   }
   .font-serif-display {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Martel', Georgia, serif;
   }
   .font-devanagari {
-    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
   }
 
-  .chalk-text {
-    text-shadow:
-      0 1px 1px rgba(0,0,0,0.06),
-      0 0 2px rgba(255,255,255,0.08);
-  }
 
-  /* ── Chalk fill (grainy noise overlay for solid accent areas) ── */
-  .chalk-fill {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-  }
-  .chalk-fill::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    border-radius: inherit;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 64px 64px;
-    mix-blend-mode: soft-light;
-    opacity: 0.5;
-  }
-  .dark .chalk-fill::after {
-    mix-blend-mode: overlay;
-    opacity: 0.35;
-  }
 
   .chalk-underline {
     position: relative;
@@ -177,44 +124,9 @@
     border-radius: var(--radius);
   }
 
-  .chalk-glow {
-    box-shadow: 0 0 18px hsl(var(--accent) / 0.2);
-  }
 
-  .chalk-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.25rem;
-  }
-  .chalk-grid span {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-    font-size: 1.1rem;
-    text-align: center;
-    opacity: 0.3;
-    color: hsl(var(--foreground));
-    transition: opacity 0.3s;
-    user-select: none;
-  }
-  .dark .chalk-grid span {
-    color: var(--chalk-white);
-  }
 }
 
-/* ── Chalk-dust noise overlay ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10000;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-}
-.dark body::after {
-  opacity: 0.025;
-}
 
 /* ── Blackboard frame (inset shadow for containers) ── */
 .blackboard-frame {
@@ -239,7 +151,6 @@ body::after {
   box-shadow:
     0 2px 8px rgba(0,0,0,0.06),
     0 1px 2px rgba(0,0,0,0.04);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .dark .notebook-card {
   background-color: hsl(40 12% 16%);
@@ -266,12 +177,6 @@ body::after {
       hsla(200, 10%, 50%, 0.07) 27px,
       hsla(200, 10%, 50%, 0.07) 28px
     );
-}
-.notebook-card:hover {
-  box-shadow:
-    0 6px 20px rgba(0,0,0,0.1),
-    0 2px 6px rgba(0,0,0,0.06);
-  transform: translateY(-2px);
 }
 
 /* ── Ruled notebook-paper lines ── */
@@ -302,20 +207,6 @@ body::after {
   z-index: 1;
 }
 
-/* ── Paper texture overlay ── */
-.paper-texture {
-  position: relative;
-}
-.paper-texture::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.015;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-}
 
 /* ── Devanagari frieze (decorative border) ── */
 .devanagari-frieze {
@@ -324,7 +215,7 @@ body::after {
   overflow: hidden;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
   font-size: 0.85rem;
   color: hsl(var(--foreground));
   opacity: 0.12;
@@ -415,17 +306,3 @@ body::after {
   box-shadow: 0 4px 0 -1px hsl(var(--accent));
 }
 
-/* ── Notch border for chalk-drawn look ── */
-.chalk-notch {
-  position: relative;
-}
-.chalk-notch::before {
-  content: attr(data-notch);
-  position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
-  font-family: 'Noto Sans Devanagari', sans-serif;
-  font-size: 1.5rem;
-  opacity: 0.15;
-  color: hsl(var(--accent));
-}

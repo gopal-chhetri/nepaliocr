@@ -33,6 +33,7 @@ export default {
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
+          hover: 'hsl(var(--accent-hover))',
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
@@ -57,14 +58,12 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        devanagari: ['"Noto Sans Devanagari"', 'sans-serif'],
+        sans: ['Mukta', 'system-ui', 'sans-serif'],
+        display: ['Martel', 'Georgia', 'serif'],
+        devanagari: ['Mukta', '"Noto Sans Devanagari"', 'sans-serif'],
       },
       boxShadow: {
         soft: '0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-        glow: '0 0 20px hsl(var(--accent) / 0.15)',
-        'chalk-glow': '0 0 18px hsl(var(--accent) / 0.3)',
         board: 'inset 0 0 0 2px hsl(var(--border)), inset 0 0 0 4px hsl(42 12% 70% / 0.3)',
         pin: '0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)',
       },

@@ -11,10 +11,10 @@ export function UploadPage() {
     <div className="min-h-screen bg-background">
       <div className="pt-24 pb-16 container mx-auto px-4 sm:px-6 lg:px-8">
         {showBanner && (
-          <div className="max-w-5xl mx-auto mb-8 bg-accent/10 border border-accent/30 rounded-xl p-4 text-center">
+          <div className="max-w-5xl mx-auto mb-8 bg-accent/10 border border-accent/30 rounded-md p-4 text-center">
             <p className="text-accent text-sm font-medium">
               You're using the anonymous tier: 10 OCR requests/day.{' '}
-              <Link to="/register" className="font-semibold underline hover:opacity-80">
+              <Link to="/register" className="font-semibold underline decoration-2 underline-offset-4 hover:text-foreground">
                 Sign up free
               </Link>{' '}
               for 25 requests/day.
@@ -22,12 +22,11 @@ export function UploadPage() {
           </div>
         )}
         <div className="text-center space-y-4 mb-12">
-          <h2 className="text-4xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
-            Nepali OCR Converter
+          <h2 className="text-3xl sm:text-4xl font-serif-display font-bold text-foreground">
+            Read a Nepali page
           </h2>
-          <span className="chalk-underline block mx-auto w-20 h-1 mt-2 mb-4" />
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Upload your document and extract text instantly.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Upload a photo or scan. The extracted text appears next to it, ready to edit and copy.
           </p>
         </div>
         <OcrUpload />

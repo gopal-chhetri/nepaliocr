@@ -64,9 +64,9 @@ const ocrRoute = createRoute({
   component: () => (
     <SectionLayout>
       <div className="space-y-8">
-        <h2 className="text-3xl font-serif-display font-bold text-foreground chalk-text">Nepali OCR Converter</h2>
+        <h2 className="text-3xl font-serif-display font-bold text-foreground">Read a Nepali page</h2>
         <p className="text-muted-foreground">
-          Upload your document and watch as it's transformed into digital text in seconds.
+          Upload a photo or scan. The extracted text appears next to it, ready to edit and copy.
         </p>
         <OcrUpload />
       </div>

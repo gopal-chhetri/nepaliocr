@@ -1,111 +1,71 @@
-import { motion } from 'framer-motion'
-import { BookOpen, Globe, Users, ArrowRight } from '@phosphor-icons/react'
+import { ArrowRight } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Link } from '@tanstack/react-router'
 import { DEV_FRIEZE_SHUFFLED } from '@/lib/devanagari'
 
-const missions = [
+const uses = [
   {
-    icon: BookOpen,
-    title: 'Preserve Heritage',
-    description: "Digitize and safeguard Nepal's rich literary and cultural heritage for future generations.",
+    who: 'Archivists and libraries',
+    what: 'turning old printed books and gazettes into searchable text before the paper falls apart.',
   },
   {
-    icon: Globe,
-    title: 'Enhance Accessibility',
-    description: 'Make Nepali content readable, searchable, and globally accessible.',
+    who: 'Students and researchers',
+    what: 'quoting from Nepali sources without retyping them.',
   },
   {
-    icon: Users,
-    title: 'Support Researchers',
-    description: 'Accelerate scholarly, legal, and academic translation and archival work.',
+    who: 'Offices and legal work',
+    what: 'pulling text out of scanned letters, notices and forms.',
   },
 ]
 
 export function About({ page = false }: { page?: boolean }) {
   return (
-    <section id="about" className={`${page ? 'py-10 sm:py-12' : 'py-28'} bg-secondary/20 relative overflow-hidden`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <motion.div
-          className="text-center space-y-4 mb-20"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <div className="inline-flex items-center gap-2 rounded-lg border border-dashed border-accent/40 bg-accent/8 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
-            Our Purpose
+    <section id="about" className={`${page ? 'py-12' : 'py-24'} bg-secondary/40`}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-5 gap-12 mb-16">
+          <div className="lg:col-span-2 space-y-4">
+            <h2 className="text-3xl sm:text-4xl font-serif-display font-bold text-foreground">
+              Why we built it
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              A lot of Nepali writing only exists on paper or as image scans. You can't search it,
+              quote it or translate it until someone types it out. We wanted that to take seconds,
+              not afternoons.
+            </p>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-serif-display font-bold text-foreground chalk-text">
-            Our Mission & Impact
-          </h2>
-          <span className="chalk-underline block mx-auto w-24 h-1 mt-2" />
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Bridging historic Devanagari literature into the digital era with intelligent OCR.
-          </p>
-        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {missions.map((mission, index) => (
-            <motion.div
-              key={index}
-              className="notebook-card rounded-2xl p-8 transition-all duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-dashed border-accent/30 flex items-center justify-center text-accent mb-6">
-                <mission.icon className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">{mission.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{mission.description}</p>
-            </motion.div>
-          ))}
+          <ul className="lg:col-span-3 space-y-6 self-center">
+            {uses.map((use) => (
+              <li key={use.who} className="text-lg leading-relaxed text-muted-foreground">
+                <strong className="font-semibold text-foreground">{use.who}</strong>, {use.what}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <motion.div
-          className="relative rounded-3xl bg-accent/90 p-8 sm:p-12 text-accent-foreground shadow-2xl overflow-hidden"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-blackboard/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="devanagari-frieze text-sm opacity-20 mb-4 justify-center">
-            {DEV_FRIEZE_SHUFFLED.map((ch, i) => (
+        <div className="rounded-lg bg-blackboard-dark text-chalk-white p-8 sm:p-12">
+          <div className="devanagari-frieze text-sm mb-6 justify-start">
+            {DEV_FRIEZE_SHUFFLED.slice(0, 18).map((ch, i) => (
               <span key={i}>{ch}</span>
             ))}
           </div>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-            <div className="space-y-3 max-w-xl">
-              <h3 className="text-2xl sm:text-4xl font-serif-display font-bold chalk-text">
-                Start Digitizing Documents Today
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4 max-w-xl">
+              <h3 className="text-2xl sm:text-4xl font-serif-display font-bold">
+                Try it on a page you have right now
               </h3>
-              <p className="text-accent-foreground/80 text-sm sm:text-base leading-relaxed">
-                Try NepaliOCR right now without registration, or create a free account for higher daily extraction limits.
+              <p className="text-chalk-white/80 leading-relaxed">
+                No account needed. Sign up for free if you need more pages per day.
               </p>
             </div>
             <Link to="/upload">
-              <Button
-                variant="chalk"
-                size="lg"
-                className="font-semibold px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all bg-blackboard text-chalk-white hover:bg-blackboard-dark"
-              >
-                Try Free Now
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="chalk" size="lg" className="px-8 bg-chalk-yellow text-blackboard-dark hover:bg-chalk-white">
+                Upload a page
+                <ArrowRight className="ml-2" size={16} />
               </Button>
             </Link>
           </div>
-
-          <div className="devanagari-frieze text-sm opacity-20 mt-4 justify-center">
-            {DEV_FRIEZE_SHUFFLED.map((ch, i) => (
-              <span key={i}>{ch}</span>
-            ))}
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

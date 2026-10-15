@@ -37,11 +37,11 @@ export function HistoryPanel({ history, onRemove, onClear, onReOcr }: HistoryPan
   }
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-xl overflow-hidden">
+    <div className="rounded-lg border border-border/70 bg-card shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-accent" size={18} />
-          <h3 className="text-sm font-semibold text-foreground chalk-text">Local OCR History</h3>
+          <h3 className="text-sm font-semibold text-foreground">Local OCR History</h3>
           <span className="text-xs text-muted-foreground">({history.length})</span>
         </div>
         {history.length > 0 && (
@@ -89,7 +89,7 @@ export function HistoryPanel({ history, onRemove, onClear, onReOcr }: HistoryPan
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(entry.timestamp).toLocaleString()}
                     </p>
                     <p className="text-sm truncate font-devanagari text-foreground/90">
@@ -111,7 +111,7 @@ export function HistoryPanel({ history, onRemove, onClear, onReOcr }: HistoryPan
                       className="overflow-hidden"
                     >
                       <div className="px-5 pb-4">
-                        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 mb-3">
+                        <div className="rounded-md border border-border/60 bg-muted/20 p-3 mb-3">
                           <p
                             className="text-sm leading-relaxed whitespace-pre-wrap font-devanagari text-foreground"
                             lang="ne"
@@ -119,7 +119,7 @@ export function HistoryPanel({ history, onRemove, onClear, onReOcr }: HistoryPan
                             {entry.text || 'No text detected'}
                           </p>
                           {entry.engine && (
-                            <p className="text-[11px] text-muted-foreground mt-2">via {entry.engine}</p>
+                            <p className="text-xs text-muted-foreground mt-2">via {entry.engine}</p>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ function IconAction({
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
+      className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border transition-colors ${
         danger
           ? 'text-destructive border-destructive/30 hover:bg-destructive/10'
           : 'text-muted-foreground border-border/60 hover:text-foreground hover:bg-secondary'
